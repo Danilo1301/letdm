@@ -9,9 +9,6 @@
   },
   "author": "Danilo",
   "license": "ISC",
-  "engines": {
-    "node": "14.x"
-  },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "typescript": "^5.2.2"
@@ -23,7 +20,11 @@
     "fs": "^0.0.1-security",
     "request": "^2.88.2",
     "socket.io": "^4.7.2",
+    "steam-totp": "^2.1.2",
     "steam-user": "^5.0.4",
     "ts-node": "^10.9.1"
+  },
+  "engines": {
+    "node": "16.x"
   }
 }
