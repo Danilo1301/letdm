@@ -1,0 +1,47 @@
+center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+  
+form {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+form input.text {
+  width: auto;
+  margin: 0;
+  padding: 5;
+}
+
+form input.button {
+  margin: 0 10px;
+}
+
+img {
+  width: min(70vw, 600px);
+  height: auto;
+  transition: width 0s;
+}
+
+h1.gay {
+  padding: 5px 20px;
+  border-radius: 20px;
+  font-size: 20px;
+  cursor: pointer;
+  animation-name: h1gayAnim;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+}
+
+h1.gay:hover {
+  transition: background 0.2s;
+}
+
+@keyframes h1gayAnim {
+  from {background-color: #000000;}
+  to {background-color: #494949;}
+}
