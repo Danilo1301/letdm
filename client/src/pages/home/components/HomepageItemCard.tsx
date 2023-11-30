@@ -34,7 +34,7 @@ export const HomepageItemCard: React.FC<IHomepageItemCardProps> = (props) =>
         <>
             <div className="row border p-0 m-0">
                 <div className="col-auto p-0">
-                    <img src={homepageItem.image} className="bg-dark border float-left" width="300px" height="200px" alt="..."></img>
+                    <img src={homepageItem.image} className="bg-dark border float-left rounded" width="300px" height="200px" alt="..."></img>
                 </div>
                 <div className="col">
                     <div className="row" style={{height: '100%'}}>

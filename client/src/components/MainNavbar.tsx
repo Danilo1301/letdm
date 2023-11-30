@@ -3,7 +3,7 @@ import React from 'react';
 function MainNavbar() {
     return (
         <nav className="navbar navbar-expand-lg" style={{background: "#e3e5ff"}}>
-            <div className="container-fluid">
+            <div className="container">
                 {/*<a className="navbar-brand" href="/">LetDM</a>*/}
                 <img style={{width: "50px"}} src="logo.png" alt="Logo" />;
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">

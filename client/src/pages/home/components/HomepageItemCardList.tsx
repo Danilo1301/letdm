@@ -27,7 +27,7 @@ export const HomepageItemCardList: React.FC<IHomepageItemCardListProps> = (props
         <>
             <ul className="list-group" style={{marginBottom: 120}}>
 
-                <div className="p-2 bg-primary">
+                <div className="p-2" style={{background: "#938ee3"}}>
                     <h5 className="text-light mb-1">{props.title}</h5>
                     <small className="text-light">{items.length} projects</small>
                 </div>
