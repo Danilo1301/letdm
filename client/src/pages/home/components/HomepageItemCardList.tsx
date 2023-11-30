@@ -33,7 +33,7 @@ export const HomepageItemCardList: React.FC<IHomepageItemCardListProps> = (props
                 </div>
 
                 {items.map((homepageItem, idx) => (
-                    <li key={idx} className="list-group-item p-2">
+                    <li key={idx} className="list-group-item" style={{background: "#eae8ff", marginBottom: "20px", paddingTop: "10px", paddingBottom: "10px"}}>
                         <HomepageItemCard homepageItem={homepageItem}></HomepageItemCard>
                     </li>
                 ))}

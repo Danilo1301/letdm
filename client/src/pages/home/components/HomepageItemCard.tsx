@@ -34,7 +34,7 @@ export const HomepageItemCard: React.FC<IHomepageItemCardProps> = (props) =>
         <>
             <div className="row border p-0 m-0">
                 <div className="col-auto p-0">
-                    <img src={homepageItem.image} className="bg-dark border float-left rounded" width="300px" height="200px" alt="..."></img>
+                    <img src={homepageItem.image} className="bg-dark border float-left rounded" width="300px" alt="..."></img>
                 </div>
                 <div className="col">
                     <div className="row" style={{height: '100%'}}>
@@ -47,7 +47,7 @@ export const HomepageItemCard: React.FC<IHomepageItemCardProps> = (props) =>
                             {
                                 homepageItem.videoPreviewId != undefined ?
                                 <>
-                                <div className="col-auto p-2">
+                                <div className="col-auto p-1">
                                     <button className="btn flex btn-primary" onClick={handleShow}><i className="fa fa-youtube"></i> Show video</button>
                                 </div>
                                 </> : <></>
@@ -55,7 +55,7 @@ export const HomepageItemCard: React.FC<IHomepageItemCardProps> = (props) =>
                             {
                                 homepageItem.pageUrl != undefined ?
                                 <>
-                                <div className="col-auto p-2">
+                                <div className="col-auto p-1">
                                     <button className="btn btn-secondary" onClick={handleViewPage}><i className="fa fa-file"></i> View page</button>
                                 </div>
                                 </> : <></>
@@ -63,12 +63,11 @@ export const HomepageItemCard: React.FC<IHomepageItemCardProps> = (props) =>
                             {
                                 homepageItem.githubUrl != undefined ?
                                 <>
-                                <div className="col-auto p-2">
+                                <div className="col-auto p-1">
                                     <button className="btn btn-secondary" onClick={handleViewGithub}><i className="fa fa-github"></i> Github</button>
                                 </div>
                                 </> : <></>
                             }
-                            
                         </div>
                     </div>
                 </div>

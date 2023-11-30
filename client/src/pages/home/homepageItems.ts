@@ -81,14 +81,6 @@ export const homePageItems: HomepageItem[] =
         categories: [HomepageItemCategory.PROJECTS]
     },
     {
-        title: "Animelist",
-        shortDescription: "",
-        description: "",
-        image: "assets/thumbs/unknown-project.png",
-        pageUrl: "https://letdm-animelist.glitch.me",
-        categories: [HomepageItemCategory.PROJECTS]
-    },
-    {
         title: "Voice Chat",
         shortDescription: "",
         description: "",
@@ -180,6 +172,14 @@ export const homePageItems: HomepageItem[] =
         videoPreviewId: undefined,
         githubUrl: "https://github.com/Danilo1301/Nsiren",
         hidden: false
+    },
+    {
+        title: "Animelist",
+        shortDescription: "A site that organizes a list of animes",
+        description: "",
+        image: "assets/thumbs/animelist.png",
+        pageUrl: "https://letdm-animelist.glitch.me",
+        categories: [HomepageItemCategory.PRINCIPAL, HomepageItemCategory.PROJECTS]
     },
     {
         title: "Dorime Multiplayer",
