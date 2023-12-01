@@ -182,6 +182,15 @@ export const homePageItems: HomepageItem[] =
         categories: [HomepageItemCategory.PRINCIPAL, HomepageItemCategory.PROJECTS]
     },
     {
+        title: "Vilubri",
+        shortDescription: "",
+        description: "",
+        image: "assets/thumbs/vilubri.png",
+        pageUrl: "https://vilubri.glitch.me/",
+        categories: [HomepageItemCategory.PRINCIPAL, HomepageItemCategory.PROJECTS],
+        githubUrl: "https://github.com/Danilo1301/vilubri"
+    },
+    {
         title: "Dorime Multiplayer",
         shortDescription: "Game in Scratch (2020)",
         description: "",
