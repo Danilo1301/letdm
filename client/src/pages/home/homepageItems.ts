@@ -179,7 +179,8 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/animelist.png",
         pageUrl: "https://letdm-animelist.glitch.me",
-        categories: [HomepageItemCategory.PRINCIPAL, HomepageItemCategory.PROJECTS]
+        categories: [HomepageItemCategory.PRINCIPAL, HomepageItemCategory.PROJECTS],
+        githubUrl: "https://github.com/Danilo1301/animelist"
     },
     {
         title: "Vilubri",
