@@ -2,7 +2,7 @@ import React from 'react';
 
 function MainNavbar() {
     return (
-        <nav className="navbar navbar-expand-lg" style={{background: "#e3e5ff"}}>
+        <nav className="navbar navbar-expand-lg" style={{background: "#becbff"}}>
             <div className="container">
                 {/*<a className="navbar-brand" href="/">LetDM</a>*/}
                 <img style={{width: "50px", marginRight: "50px"}} src="/logo.png" alt="Logo" />
