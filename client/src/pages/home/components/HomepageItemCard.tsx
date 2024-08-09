@@ -22,7 +22,13 @@ export const HomepageItemCard: React.FC<IHomepageItemCardProps> = (props) =>
 
     const handleViewPage = () => {
         const url = homepageItem.pageUrl!
-        window.open(url, '_blank')?.focus()
+
+        if(props.homepageItem.openNewPage)
+        {
+            window.open(url, '_blank')?.focus()
+        } else {
+            window.location.href = url;
+        }
     }
 
     const handleViewGithub = () => {

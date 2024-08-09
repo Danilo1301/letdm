@@ -1,0 +1,12 @@
+.back {
+    margin-bottom: 20px;
+    background-color: #dbedff;
+}
+
+.item_selectable {
+    background: white;
+}
+
+.item_selectable:hover {
+    background: #b2b4e5;
+}

@@ -1,17 +1,47 @@
-import { HomepageItem, HomepageItemCategory } from "./HomepageItem";
+import { GTAModType, HomepageItem, HomepageItemCategory } from "./HomepageItem";
 
 export const homePageItems: HomepageItem[] =
 [
+    {
+        title: "Games & Projects",
+        shortDescription: "My games and projects",
+        description: "",
+        image: "assets/jogos_e_projetos.png",
+        pageUrl: "/projects",
+        openNewPage: false,
+        categories: [HomepageItemCategory.MAIN_PROJECTS],
+    },
+    {
+        title: "GTA SA Mods",
+        shortDescription: "GTA San Andreas - Mods, suggestions, vehicles and more",
+        description: "",
+        image: "assets/gtasa_mods.png",
+        pageUrl: "/gtasa",
+        openNewPage: false,
+        categories: [HomepageItemCategory.MAIN_PROJECTS],
+    },
+
     {
         title: "Cafemania",
         shortDescription: "Game made in Typescript using Phaser game engine",
         description: "",
         image: "assets/thumbs/cafemania.png",
         pageUrl: "https://cafemania.danilomaioli.repl.co",
+        openNewPage: true,
         categories: [HomepageItemCategory.GAMES, HomepageItemCategory.PRINCIPAL],
         videoPreviewId: "W2RUrSYOGoU",
         githubUrl: "https://github.com/Danilo1301/cafemania",
-        hidden: false
+    },
+    {
+        title: "Guitar Game",
+        shortDescription: "Game made in Typescript using Phaser game engine and Three.js",
+        description: "",
+        image: "assets/thumbs/guitargame.png",
+        pageUrl: "https://guitargame.glitch.me",
+        openNewPage: true,
+        categories: [HomepageItemCategory.GAMES, HomepageItemCategory.PRINCIPAL],
+        videoPreviewId: "QoH6S8aiJg4",
+        githubUrl: "https://github.com/Danilo1301/TestGame1",
     },
     {
         title: "Hello Morgan",
@@ -19,6 +49,7 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "https://cdn2.scratch.mit.edu/get_image/project/131653700_144x108.png",
         pageUrl: "https://scratch.mit.edu/projects/131653700/",
+        openNewPage: true,
         categories: [HomepageItemCategory.GAMES, HomepageItemCategory.SCRATCH]
     },
     {
@@ -27,6 +58,7 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "https://uploads.scratch.mit.edu/get_image/project/85648310_100x80.png",
         pageUrl: "https://scratch.mit.edu/projects/85648310/",
+        openNewPage: true,
         categories: [HomepageItemCategory.GAMES]
     },
     {
@@ -35,6 +67,7 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/gta2-babylonjs.png",
         pageUrl: "https://gta2-babylonjs.glitch.me/",
+        openNewPage: true,
         categories: [HomepageItemCategory.GAMES]
     },
     {
@@ -43,6 +76,7 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/roblox-top-down-game.png",
         pageUrl: "https://www.roblox.com/games/10979611273/Top-down-game-test",
+        openNewPage: true,
         categories: [HomepageItemCategory.GAMES]
     },
     {
@@ -51,6 +85,7 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/videomanager.png",
         categories: [HomepageItemCategory.PROJECTS, HomepageItemCategory.PRINCIPAL],
+        openNewPage: true,
         videoPreviewId: "WlmxwY7mR3M",
         githubUrl: "https://github.com/Danilo1301/video-manager",
     },
@@ -60,6 +95,7 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/chat.png",
         pageUrl: "https://dmdassc-chat1.glitch.me",
+        openNewPage: true,
         categories: [HomepageItemCategory.PROJECTS]
     },
     {
@@ -68,6 +104,7 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/crabgame-server-mod.png",
         pageUrl: "https://www.youtube.com/watch?v=UNDTeMtOLVY",
+        openNewPage: true,
         categories: [HomepageItemCategory.PROJECTS],
         videoPreviewId: "UNDTeMtOLVY",
         githubUrl: "https://github.com/Danilo1301/crab-game-server-mod"
@@ -78,6 +115,7 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/redactle-pt.png",
         pageUrl: "https://redactle-pt.glitch.me",
+        openNewPage: true,
         categories: [HomepageItemCategory.PROJECTS]
     },
     {
@@ -86,6 +124,7 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/voice-chat.png",
         pageUrl: "https://voice-chat-server.glitch.me",
+        openNewPage: true,
         categories: [HomepageItemCategory.PROJECTS]
     },
     {
@@ -94,39 +133,80 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/unknown-project.png",
         categories: [HomepageItemCategory.PROJECTS],
-        githubUrl: "https://github.com/Danilo1301/youtube-playlist-check"
+        githubUrl: "https://github.com/Danilo1301/youtube-playlist-check",
+        openNewPage: true
+    },
+    {
+        title: "Mod Policia (Mobile)",
+        shortDescription: "A GTA San Andreas mod that makes you a police officer",
+        description: "",
+        image: "assets/thumbs/mod-policia-android.png",
+        categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL],
+        videoPreviewId: "qWYA-mso9MU",
+        githubUrl: "https://github.com/Danilo1301/GTASA_libModPolicia",
+        openNewPage: true,
+        hidden: false,
+        gtaModType: GTAModType.ANDROID
     },
     {
         title: "Giroflex VSL (Mobile)",
         shortDescription: "A GTA San Andreas mod that allows you to create your own police lights",
         description: "",
         image: "assets/thumbs/giroflex-mobile.png",
-        pageUrl: undefined,
         categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL],
         videoPreviewId: "pnYOUqGRV6Q",
         githubUrl: "https://github.com/Danilo1301/GTASA_libGiroflexVSL",
-        hidden: false
+        openNewPage: true,
+        hidden: false,
+        gtaModType: GTAModType.ANDROID
     },
     {
         title: "Giroflex VSL - Pattern helper",
         shortDescription: "A web page that allows you to create your own police lights for my mod called 'Giroflex VSL'",
         description: "",
         image: "assets/thumbs/giroflex-vsl-pattern.png",
-        pageUrl: "https://giroflex-mobile-pattern-v2.glitch.me/",
+        pageUrl: "https://giroflex-mobile-pattern-v3.glitch.me",
         categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL],
         videoPreviewId: "KZkaiiXhtLU",
-        githubUrl: undefined,
-        hidden: false
+        openNewPage: true,
+        hidden: false,
+        gtaModType: GTAModType.BOTH
     },
     {
-        title: "Vehicle Siren Lights",
+        title: "Multi Remap (Mobile)",
+        shortDescription: "A GTA San Andreas mod that allows you to change your vehicle/skin remap (or its textures)",
+        description: "",
+        image: "assets/thumbs/multi-remap-android.png",
+        categories: [HomepageItemCategory.GTA_SA_MODS, HomepageItemCategory.PRINCIPAL],
+        videoPreviewId: "PoQVXEGcZDw",
+        githubUrl: "https://github.com/Danilo1301/GTASA_libMultiRemap",
+        openNewPage: true,
+        hidden: false,
+        gtaModType: GTAModType.ANDROID
+    },
+    {
+        title: "Menu VSL",
+        shortDescription: "Create your own menu using CLEO or C++",
+        description: "",
+        image: "assets/thumbs/menu-vsl.png",
+        categories: [HomepageItemCategory.GTA_SA_MODS],
+        videoPreviewId: "WHYu_alCMbU",
+        githubUrl: "https://github.com/Danilo1301/GTASA_libMenuVSL",
+        openNewPage: true,
+        hidden: false,
+        gtaModType: GTAModType.ANDROID
+    },
+    {
+        title: "Giroflex VSL (PC)",
         shortDescription: "",
         description: "",
         image: "assets/thumbs/vehicle-siren-lights.png",
         pageUrl: "https://www.youtube.com/watch?v=sTG_e6sXQD4",
         categories: [HomepageItemCategory.GTA_SA_MODS],
         videoPreviewId: "sTG_e6sXQD4",
-        githubUrl: "https://github.com/Danilo1301/vehicle-siren-lights-v2"
+        githubUrl: "https://github.com/Danilo1301/vehicle-siren-lights-v2",
+        openNewPage: true,
+        gtaModType: GTAModType.PC
     },
     {
         title: "Neon Lights",
@@ -134,8 +214,10 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/neon-lights.png",
         pageUrl: undefined,
+        openNewPage: true,
         categories: [HomepageItemCategory.GTA_SA_MODS],
-        videoPreviewId: "nFGJpmpwkhY"
+        videoPreviewId: "nFGJpmpwkhY",
+        gtaModType: GTAModType.PC
     },
     {
         title: "Hydra Missile",
@@ -144,7 +226,9 @@ export const homePageItems: HomepageItem[] =
         image: "assets/thumbs/hydra-missile.png",
         categories: [HomepageItemCategory.GTA_SA_MODS],
         videoPreviewId: "VDC6f95FV8w",
-        githubUrl: "https://github.com/Danilo1301/hydra-missile"
+        githubUrl: "https://github.com/Danilo1301/hydra-missile",
+        openNewPage: true,
+        gtaModType: GTAModType.PC
     },
     {
         title: "Hydra Thrust",
@@ -152,7 +236,9 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/unknown-project.png",
         categories: [HomepageItemCategory.GTA_SA_MODS],
-        githubUrl: "https://github.com/Danilo1301/hydra-thrust"
+        githubUrl: "https://github.com/Danilo1301/hydra-thrust",
+        openNewPage: true,
+        gtaModType: GTAModType.PC
     },
     {
         title: "Multi Siren",
@@ -160,7 +246,9 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/unknown-project.png",
         categories: [HomepageItemCategory.GTA_SA_MODS],
-        githubUrl: "https://github.com/Danilo1301/multi-siren"
+        githubUrl: "https://github.com/Danilo1301/multi-siren",
+        openNewPage: true,
+        gtaModType: GTAModType.PC
     },
     {
         title: "NSiren (old)",
@@ -171,7 +259,9 @@ export const homePageItems: HomepageItem[] =
         categories: [HomepageItemCategory.GTA_SA_MODS],
         videoPreviewId: undefined,
         githubUrl: "https://github.com/Danilo1301/Nsiren",
-        hidden: false
+        openNewPage: true,
+        hidden: false,
+        gtaModType: GTAModType.PC
     },
     {
         title: "Animelist",
@@ -180,7 +270,8 @@ export const homePageItems: HomepageItem[] =
         image: "assets/thumbs/animelist.png",
         pageUrl: "https://letdm-animelist.glitch.me",
         categories: [HomepageItemCategory.PRINCIPAL, HomepageItemCategory.PROJECTS],
-        githubUrl: "https://github.com/Danilo1301/animelist"
+        githubUrl: "https://github.com/Danilo1301/animelist",
+        openNewPage: true
     },
     {
         title: "Vilubri",
@@ -188,8 +279,9 @@ export const homePageItems: HomepageItem[] =
         description: "",
         image: "assets/thumbs/vilubri.png",
         pageUrl: "https://vilubri.glitch.me/",
-        categories: [HomepageItemCategory.PRINCIPAL, HomepageItemCategory.PROJECTS],
-        githubUrl: "https://github.com/Danilo1301/vilubri"
+        categories: [HomepageItemCategory.MAIN_PROJECTS, HomepageItemCategory.PRINCIPAL, HomepageItemCategory.PROJECTS],
+        githubUrl: "https://github.com/Danilo1301/vilubri",
+        openNewPage: true
     },
     {
         title: "Dorime Multiplayer",
@@ -200,7 +292,8 @@ export const homePageItems: HomepageItem[] =
         categories: [HomepageItemCategory.SCRATCH],
         videoPreviewId: undefined,
         githubUrl: undefined,
-        hidden: false
+        hidden: false,
+        openNewPage: true
     },
     {
         title: "Desvie (Webcam)",
@@ -211,6 +304,7 @@ export const homePageItems: HomepageItem[] =
         categories: [HomepageItemCategory.SCRATCH],
         videoPreviewId: undefined,
         githubUrl: undefined,
-        hidden: false
+        hidden: false,
+        openNewPage: true
     },
 ]
