@@ -20,7 +20,7 @@ export class LogTest {
         request.post(
             url,
             { headers: {'user-agent': `service-${this.SERVICE_NAME}`}, json: data },
-            function (error, response, body) {
+            function (error: any, response: any, body: any) {
 
                 if(error) {
                     console.log("[gamelog] post error");

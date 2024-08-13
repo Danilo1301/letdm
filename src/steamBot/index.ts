@@ -23,11 +23,11 @@ export class SteamBot extends App {
             this.sendOwnerChatMessage("Bot is up");
         });
 
-        client.on('error', function (err) {
+        client.on('error', function (err: any) {
             console.log(`[steamBot] Error: ${err}`);
         });
 
-        client.on("friendMessage", function(steamID, message) {
+        client.on("friendMessage", function(steamID: string, message: string) {
             console.log("[steamBot] Friend message from " + steamID + ": " + message);
             
             client.chatMessage(steamID, message)
@@ -47,7 +47,7 @@ export class SteamBot extends App {
     {
         const code = SteamTotp.generateAuthCode(process.env.STEAM_SHARED_SECRET);
 
-        console.log(`[SteamBot] login cancelled`);
+        console.log(`[SteamBot] login cancelled, code: ${code}`);
 
         return;
 

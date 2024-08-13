@@ -3,6 +3,7 @@ import { Client, ClientOptions } from 'discord.js';
 
 export class DiscordBot extends App {
     public static DEFAULT_CHANNEL = "663429290846847007";
+    public static UPTIME_CHANNEL = "1272947207959744654";
 
     private _client: Client;
     private _autoLogin: boolean = false;
@@ -39,7 +40,7 @@ export class DiscordBot extends App {
         const client = this._client;
         const self = this;
 
-        client.on('message', msg => {
+        client.on('message', (msg: any) => {
             console.log(`[DiscordBot] Message: ${msg.content}`);
             
             //msg.reply(msg.content);
@@ -53,13 +54,19 @@ export class DiscordBot extends App {
             console.log(`[DiscordBot] Logged in as ${user.tag}!`);
 
             //user.setStatus('invisible');
-            this.sendOwnerMessage("Bot is up");
+
+            this.sendUptimeMessage("Bot is up");
         });
     }
 
     public sendOwnerMessage(message: string)
     {
         this.sendChannelMessage(DiscordBot.DEFAULT_CHANNEL, message);
+    }
+
+    public sendUptimeMessage(message: string)
+    {
+        this.sendChannelMessage(DiscordBot.UPTIME_CHANNEL, message);
     }
 
     public sendChannelMessage(channelId: string, message: string)
@@ -72,7 +79,7 @@ export class DiscordBot extends App {
             return;
         }
 
-        this.client.channels.fetch(channelId).then(channel => {
+        this.client.channels.fetch(channelId).then((channel: any) => {
             channel!['send'](message);
         })
     }

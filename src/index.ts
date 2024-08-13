@@ -7,10 +7,11 @@ import fs from 'fs';
 
 import { AppManager } from "./app/appManager";
 import { DiscordBot } from "./discordBot";
-import { PATH_DATA, PATH_PUBLIC, PATH_REACT } from "./paths";
+import { PATH_CLIENT, PATH_DATA, PATH_PUBLIC } from "./paths";
 import { Aternos } from './aternos';
 import { Log } from './log';
 import { SteamBot } from './steamBot';
+import { Suggestions } from './suggestions/suggestions';
 
 const isDevelopment = (process.env.NODE_ENV || "development").trim() === 'development';
 const port = 3000;
@@ -23,15 +24,23 @@ const io: socketio.Server = new socketio.Server();
 
 const appManager: AppManager = new AppManager();
 
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
+
 function main()
 {
     console.log("[index] main");
+
+    if(!fs.existsSync(PATH_DATA)) fs.mkdirSync(PATH_DATA);
 
     loadEnvs();
     
     setupExpressApp();
 
-    appManager.addApp(new DiscordBot("DiscordBot", true));
+    const autoLoginDiscordBot = true;
+
+    appManager.addApp(new Suggestions("Suggestions", app, upload));
+    appManager.addApp(new DiscordBot("DiscordBot", autoLoginDiscordBot));
     appManager.addApp(new SteamBot("SteamBot"));
     appManager.addApp(new Log("Log", app, <DiscordBot>appManager.getApp("DiscordBot")));
 
@@ -90,7 +99,7 @@ function setupExpressApp()
 function setupExpressRoutes()
 {
     app.use(express.static(PATH_PUBLIC));
-    app.use(express.static(PATH_REACT));
+    app.use(express.static(PATH_CLIENT));
 
     app.get("/api", (req, res) => res.json({ message: "Hello from server! " + new Date().getTime() }) );
 
@@ -112,7 +121,7 @@ function setupExpressRoutes()
 
     app.get("/notapi", (req, res) => res.json({ message: "Hello from server! " + new Date().getTime() }) );
 
-    app.get("*", (req, res) => res.sendFile(path.join(PATH_REACT, "index.html")));
+    app.get("*", (req, res) => res.sendFile(path.join(PATH_CLIENT, "index.html")));
 
 }
 

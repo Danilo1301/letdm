@@ -1,0 +1,22 @@
+.back {
+    margin-bottom: 20px;
+    background-color: #dbedff;
+}
+
+.item_selectable {
+    background: white;
+}
+
+.item_selectable:hover {
+    background: #b2b4e5;
+}
+
+.suggestion-tag {
+    background-color: rgb(217, 217, 217);
+    margin: 3px;
+    cursor: pointer;
+}
+
+.suggestion-tag.enabled {
+    background-color: rgb(86, 74, 226);
+}
