@@ -11,6 +11,8 @@ export const suggestionTags: string[] = [
     "Mod Giroflex",
     "Mod MultiRemap",
     "Mod MenuVSL",
+    "Mod MultiSiren",
+    "Other mod",
     "New mod"
 ];
 export const suggestionPriorityTags: string[] = [

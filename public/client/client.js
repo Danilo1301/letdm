@@ -3710,7 +3710,7 @@ eval("\nvar __importDefault = (this && this.__importDefault) || function (mod) {
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\nexports.suggestionPriorityTags = exports.suggestionTags = void 0;\nexports.suggestionTags = [\n    \"Mod Policia\",\n    \"Mod Giroflex\",\n    \"Mod MultiRemap\",\n    \"Mod MenuVSL\",\n    \"New mod\"\n];\nexports.suggestionPriorityTags = [\n    \"Completed\",\n    \"High priority\",\n    \"Normal suggestion\",\n    \"Low priority\"\n];\n\n\n//# sourceURL=webpack://letdm/./src/suggestions/suggestion.ts?");
+eval("\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\nexports.suggestionPriorityTags = exports.suggestionTags = void 0;\nexports.suggestionTags = [\n    \"Mod Policia\",\n    \"Mod Giroflex\",\n    \"Mod MultiRemap\",\n    \"Mod MenuVSL\",\n    \"Mod MultiSiren\",\n    \"Other mod\",\n    \"New mod\"\n];\nexports.suggestionPriorityTags = [\n    \"Completed\",\n    \"High priority\",\n    \"Normal suggestion\",\n    \"Low priority\"\n];\n\n\n//# sourceURL=webpack://letdm/./src/suggestions/suggestion.ts?");
 
 /***/ }),
 

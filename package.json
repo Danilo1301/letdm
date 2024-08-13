@@ -14,7 +14,8 @@
     "request": "^2.88.2",
     "socket.io": "^4.7.5",
     "steam-user": "^5.0.10",
-    "style-loader": "^4.0.0"
+    "style-loader": "^4.0.0",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
@@ -30,10 +31,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "ts-node src/index.ts",
     "server": "nodemon src/index.ts",
     "client": "webpack --config webpack/webpack.config.js --watch"
   },
   "author": "Danilo1301",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "engines": {
+    "node": "14.x"
+  }
 }
