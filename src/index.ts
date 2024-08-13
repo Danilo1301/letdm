@@ -1,3 +1,10 @@
+const node: string = process.versions.node;
+console.log("node:", node);
+
+//fix issue where ReadableStream is not available in node 16
+import { ReadableStream } from "web-streams-polyfill";;
+const _globalThis: any = globalThis;
+_globalThis.ReadableStream = ReadableStream;
 
 import express from 'express';
 import http from 'http';
