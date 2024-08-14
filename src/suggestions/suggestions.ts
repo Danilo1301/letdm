@@ -1,6 +1,7 @@
 import { App } from "../app/app";
 import fs from 'fs'
 import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import { Key_PostBody, NewSugestion_PostBody, RetrieveUserInfo_PostBody, RetrieveUserInfo_Response } from "../interfaces";
 import { PATH_DATA } from "../paths";
 import { Suggestion } from "./suggestion";
@@ -11,7 +12,7 @@ export class Suggestions extends App {
 
     public upload: any;
 
-    private _suggestions: Suggestion[] = [];
+    private _suggestions = new Map<string, Suggestion>();
 
     constructor(id: string, app: express.Application, upload: any)
     {
@@ -47,16 +48,23 @@ export class Suggestions extends App {
 
     public saveSuggestions()
     {
-        const suggestions = this._suggestions;
+        const suggestions = Array.from(this._suggestions.values());
 
         fs.writeFileSync(PATH_SUGGESTIONS_JSON, JSON.stringify(suggestions));
     }
 
     public loadSuggestions()
     {
+        if(!fs.existsSync(PATH_SUGGESTIONS_JSON)) return;
+
         const suggestions: Suggestion[] = JSON.parse(fs.readFileSync(PATH_SUGGESTIONS_JSON, "utf-8"));
 
-        this._suggestions = suggestions;
+        this._suggestions.clear();
+
+        for(const suggestion of suggestions)
+        {
+            this._suggestions.set(suggestion.id, suggestion);
+        }
     }
 
     public isSubAdmin(sub: string)
@@ -73,13 +81,9 @@ export class Suggestions extends App {
         return key === process.env["LETDM_KEY"];
     }
 
-    public hasSuggestion(index: number)
+    public hasSuggestion(id: string)
     {
-        if(index >= 0 && index < this._suggestions.length)
-        {
-            return true;
-        }
-        return false;
+        return this._suggestions.has(id);
     }
 
     public setupRoutes(app: express.Application)
@@ -87,11 +91,11 @@ export class Suggestions extends App {
         app.get("/api/suggestions", (req, res) => {
             console.log("get suggestions");
 
-            res.send(Array.from(this._suggestions));   
+            res.send(Array.from(this._suggestions.values()));   
         });
 
         app.get("/api/suggestions/:id", (req, res) => {
-            const id = parseInt(req.params.id);
+            const id = req.params.id;
 
             if(!this.hasSuggestion(id))
             {
@@ -101,7 +105,7 @@ export class Suggestions extends App {
                 return
             }
 
-            res.send(this._suggestions[id]);   
+            res.send(this._suggestions.get(id));   
         });
 
         app.post("/api/suggestions/userInfo", (req, res) => {
@@ -160,19 +164,20 @@ export class Suggestions extends App {
             suggestion.content = body.suggestion.content;
             suggestion.tags = body.suggestion.tags;
             suggestion.priorityTags = body.suggestion.priorityTags;
+            suggestion.dateAdded = body.suggestion.dateAdded;
 
             this.saveSuggestions();
 
-            const index = this._suggestions.indexOf(suggestion);
-
-            res.send({id: index});   
+            res.send({id: suggestion.id});   
         });
 
         app.post("/api/suggestions/:id/edit", (req, res) => {
             const body: NewSugestion_PostBody = req.body;
-            const id = parseInt(req.params.id);
+            const id = req.params.id;
 
-            if(!this.hasSuggestion(id))
+            const suggestion = this._suggestions.get(id);
+
+            if(!suggestion)
             {
                 return res.status(400).send({
                     error: "Sugestion ID not found"
@@ -200,20 +205,20 @@ export class Suggestions extends App {
                 });
             }
 
-            const suggestion = this._suggestions[id];
             suggestion.title = body.suggestion.title;
             suggestion.username = body.suggestion.username;
             suggestion.content = body.suggestion.content;
             suggestion.tags = body.suggestion.tags;
             suggestion.priorityTags = body.suggestion.priorityTags;
-
+            suggestion.dateAdded = body.suggestion.dateAdded;
+            
             this.saveSuggestions();
 
             res.send({id: id});   
         });
 
         app.post('/api/suggestions/:id/delete', (req, res) => {
-            const id = parseInt(req.params.id);
+            const id = req.params.id;
             const body: Key_PostBody = req.body;
 
             if(!this.hasSuggestion(id))
@@ -230,7 +235,7 @@ export class Suggestions extends App {
                 });
             }
         
-            this._suggestions.splice(id, 1);
+            this._suggestions.delete(id);
 
             this.saveSuggestions();
         
@@ -271,15 +276,16 @@ export class Suggestions extends App {
     public createNewSuggestion()
     {
         const suggestion: Suggestion = {
+            id: uuidv4(),
             title: "Sugestion title",
             username: "By user",
             content: "Content here",
             tags: [],
-            priorityTags: []
+            priorityTags: [],
+            dateAdded: new Date().getTime()
         };
         
-
-        this._suggestions.push(suggestion);
+        this._suggestions.set(suggestion.id, suggestion);
 
         return suggestion;
     }

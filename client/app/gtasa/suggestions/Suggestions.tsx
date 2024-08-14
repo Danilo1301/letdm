@@ -56,13 +56,14 @@ export const Tag: React.FC<TagProps> = ({name}) =>
 }
 
 interface SuggestionElementProps {
-    id: number
     suggestion: Suggestion
 }
 
-const SuggestionElement: React.FC<SuggestionElementProps> = ({id, suggestion}) => {
+const SuggestionElement: React.FC<SuggestionElementProps> = ({suggestion}) => {
 
     const { userInfo } = useContext(UserInfoContext);
+
+    const id = suggestion.id;
 
     const edit = () => {
         location.href = `/suggestions/${id}/edit`;
@@ -75,10 +76,13 @@ const SuggestionElement: React.FC<SuggestionElementProps> = ({id, suggestion}) =
         editBtnEl = <button onClick={edit}>Editar</button>;
     }
 
+    var d = new Date(suggestion.dateAdded);
+    let dateTime = d.toLocaleString('pt-BR', {});
+
     return (
         <>
             <ListItem title={suggestion.title} description="">
-                <div>Postado por: {suggestion.username}</div>
+                <div>Postado por: {suggestion.username} | {dateTime}</div>
                 <div>{suggestion.content}</div>
                 <div>{suggestion.tags}</div>
                 <div>{suggestion.priorityTags}</div>
@@ -113,7 +117,11 @@ const Suggestions: React.FC = () => {
             });
     }, []);
 
-    let filteredSuggestions = suggestions.filter(suggestion => {
+    let organizedSuggestions = suggestions.sort((a, b) => {
+        return b.dateAdded - a.dateAdded;
+    });
+
+    organizedSuggestions = organizedSuggestions.filter(suggestion => {
 
         if(tags_suggestionType.length > 0)
         {
@@ -173,7 +181,7 @@ const Suggestions: React.FC = () => {
                     </div>
                     {newSuggestionBtnEl}
 
-                    {filteredSuggestions.map((suggestion, index) => <SuggestionElement key={index} id={suggestions.indexOf(suggestion)} suggestion={suggestion}></SuggestionElement>)}
+                    {organizedSuggestions.map((suggestion, index) => <SuggestionElement key={index} suggestion={suggestion}></SuggestionElement>)}
                 </ListItemGroup>
             </div>
         </>

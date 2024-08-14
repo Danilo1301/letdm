@@ -23,11 +23,13 @@ const NewSuggestion: React.FC = () => {
 
         const body: NewSugestion_PostBody = {
             suggestion: {
+                id: suggestionInfo.id,
                 title: suggestionInfo.title,
                 username: suggestionInfo.username,
                 content: suggestionInfo.content,
                 tags: suggestionInfo.tags,
-                priorityTags: suggestionInfo.priorityTags
+                priorityTags: suggestionInfo.priorityTags,
+                dateAdded: suggestionInfo.dateAdded
             },
             sub: userInfo.sub,
             key: getLetDM_Key()

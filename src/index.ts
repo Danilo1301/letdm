@@ -5,6 +5,7 @@ console.log("node:", node);
 import { ReadableStream } from "web-streams-polyfill";;
 const _globalThis: any = globalThis;
 _globalThis.ReadableStream = ReadableStream;
+//
 
 import express from 'express';
 import http from 'http';
@@ -20,10 +21,12 @@ import { Log } from './log';
 import { SteamBot } from './steamBot';
 import { Suggestions } from './suggestions/suggestions';
 
+loadEnvs();
+
 const isDevelopment = (process.env.NODE_ENV || "development").trim() === 'development';
 const port = 3000;
 
-console.log("[index] isDevelopment: " + isDevelopment);
+console.log("[index] mode: " + (isDevelopment ? "DEV" : "PRODUCTION"));
 
 const app: express.Application = express();
 const server: http.Server = http.createServer(app);
@@ -39,8 +42,6 @@ function main()
     console.log("[index] main");
 
     if(!fs.existsSync(PATH_DATA)) fs.mkdirSync(PATH_DATA);
-
-    loadEnvs();
     
     setupExpressApp();
 

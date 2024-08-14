@@ -1,13 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Tag, TagsContext } from "../Suggestions";
-import { suggestionPriorityTags, suggestionTags } from "../../../../../src/suggestions/suggestion";
+import { Suggestion, suggestionPriorityTags, suggestionTags } from "../../../../../src/suggestions/suggestion";
 
-export interface SuggestionInfo {
-    title: string
-    content: string
-    username: string
-    tags: string[]
-    priorityTags: string[]
+export interface SuggestionInfo extends Suggestion {
 }
   
 export interface SuggestionInfoContextType {
@@ -16,11 +11,13 @@ export interface SuggestionInfoContextType {
 }
 
 export const defaultSuggestionInfo: SuggestionInfo = {
+    id: "",
     title: "",
     content: "",
     username: "",
     tags: [],
-    priorityTags: []
+    priorityTags: [],
+    dateAdded: new Date().getTime(),
 }
 
 export const SuggestionInfoContext = createContext<SuggestionInfoContextType>({

@@ -1,9 +1,11 @@
 export interface Suggestion {
+    id: string
     title: string
     username: string
     content: string
     tags: string[]
     priorityTags: string[]
+    dateAdded: number
 }
 
 export const suggestionTags: string[] = [
@@ -16,8 +18,9 @@ export const suggestionTags: string[] = [
     "New mod"
 ];
 export const suggestionPriorityTags: string[] = [
-    "Completed",
     "High priority",
     "Normal suggestion",
-    "Low priority"
+    "Low priority",
+    "On-going",
+    "Completed",
 ];
