@@ -84,8 +84,8 @@ const SuggestionElement: React.FC<SuggestionElementProps> = ({suggestion}) => {
             <ListItem title={suggestion.title} description="">
                 <div>Postado por: {suggestion.username} | {dateTime}</div>
                 <div>{suggestion.content}</div>
-                <div>{suggestion.tags}</div>
-                <div>{suggestion.priorityTags}</div>
+                <div>{suggestion.tags.map(tag => <span key={tag} className='suggestion-tag'>{tag}</span>)}</div>
+                <div>{suggestion.priorityTags.map(tag => <span key={tag} className='suggestion-tag'>{tag}</span>)}</div>
                 {editBtnEl}
             </ListItem>
         </>
