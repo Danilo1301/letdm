@@ -91,7 +91,7 @@ export const EditSuggestionModel: React.FC<EditSuggestionModelProps> = ({onSave,
 
                 <div className='mt-4'>
                     <span>Content:</span>
-                    <input type="text" className="form-control" placeholder="Content" onChange={e => { setSuggestionInfo({content: e.target.value}) }} value={suggestionInfo.content}></input>
+                    <textarea name="description" className="form-control" cols={40} rows={10} onChange={e => setSuggestionInfo({content: e.target.value})} value={suggestionInfo.content}></textarea>
                 </div>
                 
                 <div className='row mt-4 mb-4'>
