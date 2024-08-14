@@ -5,9 +5,10 @@ import { HomepageItem } from '../../home/HomepageItem'
 
 interface ListItemModalProps {
     item: HomepageItem
+    selectable?: boolean
 }
 
-export const ListItemModal: React.FC<ListItemModalProps> = ({item}) =>
+export const ListItemModal: React.FC<ListItemModalProps> = ({item, selectable}) =>
 {
     const [show, setShow] = useState(false);
 
@@ -41,7 +42,7 @@ export const ListItemModal: React.FC<ListItemModalProps> = ({item}) =>
 
     return (
         <>
-            <ListItem title={item.title} image={item.image} description={item.shortDescription}>
+            <ListItem title={item.title} image={item.image} selectable={selectable} description={item.shortDescription}>
                 <div className="align-self-end row">
                 {
                     item.videoPreviewId != undefined ?

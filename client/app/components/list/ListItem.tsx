@@ -5,10 +5,11 @@ interface ListItemProps {
     title: string
     description: string
     href?: string
+    selectable?: boolean
     children?: React.ReactNode;
 }
 
-export const ListItem: React.FC<ListItemProps> = ({image, title, description, href, children}) =>
+export const ListItem: React.FC<ListItemProps> = ({image, title, description, href, selectable, children}) =>
 {
     let titleSize = 16;
     let imageEl = <></>;
@@ -28,10 +29,13 @@ export const ListItem: React.FC<ListItemProps> = ({image, title, description, hr
             window.location.href = href;
     };
 
+    let selectableClass = "";
+    if(selectable) selectableClass = "item_selectable";
+
     return (
         <>
             <li className="list-group-item" style={{paddingTop: "10px", paddingBottom: "10px"}}>
-                <div className="row border p-0 m-0 item_selectable" onClick={onClickItem}>
+                <div className={"row border p-0 m-0 "  + selectableClass} onClick={onClickItem}>
                     {imageEl}
                     <div className="col">
                         <div className="row" style={{height: '100%'}}>

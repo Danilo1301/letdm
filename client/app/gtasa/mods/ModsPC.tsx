@@ -3,6 +3,7 @@ import { homePageItems } from '../../home/homepageItems';
 import { GTAModType, HomepageItemCategory } from '../../home/HomepageItem';
 import { ListItemGroup } from '../../components/list/ListItemGroup';
 import { ListItem } from '../../components/list/ListItem';
+import { ListItemModal } from '../../components/list/ListItemModal';
 
 function ModsPC() {
 
@@ -41,7 +42,7 @@ function ModsPC() {
 
                         if(!pageUrl) pageUrl = item.pageUrl;
 
-                        return (<ListItem key={index} href={pageUrl} title={item.title} image={item.image} description={item.shortDescription}></ListItem>);
+                        return (<ListItemModal selectable={true} item={item}></ListItemModal>);
                     })}
                 </ListItemGroup>
             </div>

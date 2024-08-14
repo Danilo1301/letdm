@@ -13,10 +13,10 @@ function GTASA() {
                 </div>
 
                 <ListItemGroup title="GTA SA">
-                    <ListItem title="Mods Android" href="/gtasa/mods/android" description=""></ListItem>
-                    <ListItem title="Mods PC" href="/gtasa/mods/pc" description=""></ListItem>
-                    <ListItem title="Suggestions" href="/suggestions" description="Add/view mods suggestions"></ListItem>
-                    <ListItem image="assets/giroflex_e_leds.png" title="Lighbars and LEDs" href="https://gtasa-files.glitch.me" description="Download .dff models for GTA SA"></ListItem>
+                    <ListItem title="Mods Android" href="/gtasa/mods/android" selectable={true} description=""></ListItem>
+                    <ListItem title="Mods PC" href="/gtasa/mods/pc" selectable={true} description=""></ListItem>
+                    <ListItem title="Suggestions" href="/suggestions" selectable={true} description="Add/view mods suggestions"></ListItem>
+                    <ListItem image="assets/giroflex_e_leds.png" title="Lighbars and LEDs" href="https://gtasa-files.glitch.me" selectable={true} description="Download .dff models for GTA SA"></ListItem>
                 </ListItemGroup>
             </div>
         </>

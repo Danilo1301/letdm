@@ -41,7 +41,7 @@ function ModsAndroid() {
 
                         if(!pageUrl) pageUrl = item.pageUrl;
 
-                        return (<ListItemModal item={item}></ListItemModal>);
+                        return (<ListItemModal selectable={true} item={item}></ListItemModal>);
 
                         //return (<ListItem key={index} href={pageUrl} title={item.title} image={item.image} description={item.shortDescription}></ListItem>);
                     })}

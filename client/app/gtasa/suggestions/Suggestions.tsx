@@ -79,14 +79,37 @@ const SuggestionElement: React.FC<SuggestionElementProps> = ({suggestion}) => {
     var d = new Date(suggestion.dateAdded);
     let dateTime = d.toLocaleString('pt-BR', {});
 
+    //lines description
+    let lines: string[] = suggestion.content.split("\n");
+    lines = lines.map(line => {
+        line = line.trim();
+        if(line.length === 0) return "⠀";
+        return line;
+    });
+
+    let color = "gray";
+    if(suggestion.priorityTags.includes("Completed")) color = "#00BF16";
+    if(suggestion.priorityTags.includes("High priority")) color = "#FF6A00";
+    if(suggestion.priorityTags.includes("On-going")) color = "#0094FF";
+
     return (
         <>
             <ListItem title={suggestion.title} description="">
-                <div>Postado por: {suggestion.username} | {dateTime}</div>
-                <div>{suggestion.content}</div>
-                <div>{suggestion.tags.map(tag => <span key={tag} className='suggestion-tag'>{tag}</span>)}</div>
-                <div>{suggestion.priorityTags.map(tag => <span key={tag} className='suggestion-tag'>{tag}</span>)}</div>
-                {editBtnEl}
+                <div className="row" style={{background: "#2E3035", color: "#E5E5E5"}}>
+                    <div className="col-auto suggestion-status" style={{backgroundColor: color}}>
+
+                    </div>
+                    <div className="col">
+                        <div>Sugestão de: {suggestion.username} <span className='suggestion-date'>{dateTime}</span></div>
+                        <div className='suggestion-content'>{lines.map((line, i) => <div key={i}>{line}</div>)}</div>
+                        <div>{suggestion.tags.map(tag => <span key={tag} className='suggestion-tag'>{tag}</span>)}</div>
+                        <div>{suggestion.priorityTags.map(tag => <span key={tag} className='suggestion-tag'>{tag}</span>)}</div>
+                    </div>
+                    <div className="col-auto">
+                        {editBtnEl}
+                    </div>
+                </div>
+                
             </ListItem>
         </>
     );

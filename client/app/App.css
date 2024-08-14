@@ -13,10 +13,31 @@
 
 .suggestion-tag {
     background-color: rgb(217, 217, 217);
+    color: black;
     margin: 3px;
     cursor: pointer;
+    padding: 0 8px 0 8px;
+    border-radius: 20px;
 }
 
 .suggestion-tag.enabled {
-    background-color: rgb(86, 74, 226);
+    background-color: #b0a9ff;
+}
+
+.suggestion-date {
+    color: gray;
+    font-size: 14px;
+}
+
+.suggestion-content {
+    padding: 5px;
+}
+
+.suggestion-status {
+    width: 20px;
+    background-color: gray;
+}
+
+.suggestion-status.completed {
+    background-color: green;
 }
