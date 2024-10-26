@@ -1,10 +1,16 @@
 const node: string = process.versions.node;
 console.log("node:", node);
 
-//fix issue where ReadableStream is not available in node 16
+require('dotenv').config();
+
+console.log("NODE_ENV: " + process.env.NODE_ENV);
+
+// fix issue where ReadableStream is not available in node 16
+
 import { ReadableStream } from "web-streams-polyfill";;
 const _globalThis: any = globalThis;
 _globalThis.ReadableStream = ReadableStream;
+
 //
 
 import express from 'express';
@@ -21,12 +27,7 @@ import { Log } from './log';
 import { SteamBot } from './steamBot';
 import { Suggestions } from './suggestions/suggestions';
 
-loadEnvs();
-
-const isDevelopment = (process.env.NODE_ENV || "development").trim() === 'development';
-const port = 3000;
-
-console.log("[index] mode: " + (isDevelopment ? "DEV" : "PRODUCTION"));
+const port = process.env.PORT;
 
 const app: express.Application = express();
 const server: http.Server = http.createServer(app);
@@ -41,7 +42,7 @@ function main()
 {
     console.log("[index] main");
 
-    if(!fs.existsSync(PATH_DATA)) fs.mkdirSync(PATH_DATA);
+    setupDataFolder();
     
     setupExpressApp();
 
@@ -61,9 +62,22 @@ function main()
     appManager.start();
 }
 
-function loadEnvs()
+function setupDataFolder()
 {
-    require("./env")(`${PATH_DATA}/env.json`)
+    if(!fs.existsSync(PATH_DATA))
+    {
+        console.log(`/.data/ path was not found, creating...`);
+
+        fs.mkdirSync(PATH_DATA);
+    } else {
+        
+        const testPath = path.join(PATH_DATA, "test.txt");
+
+        if(fs.existsSync(testPath))
+        {
+            console.log(`Test data: ${fs.readFileSync(testPath, "utf8")}`);
+        }
+    }
 }
 
 function setupExpressApp()
@@ -109,7 +123,9 @@ function setupExpressRoutes()
     app.use(express.static(PATH_PUBLIC));
     app.use(express.static(PATH_CLIENT));
 
-    app.get("/api", (req, res) => res.json({ message: "Hello from server! " + new Date().getTime() }) );
+    app.get("/api", (req, res) => {
+        res.json({ message: "Hello from server! " + new Date().getTime() });
+    });
 
     app.get("*", (req, res, next) => {
 
@@ -126,8 +142,6 @@ function setupExpressRoutes()
     app.get("/game", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "game", "index.html")) );
     app.get("/voicechat", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "voicechat", "index.html")) );
     app.get("/aternos", (req, res) => res.sendFile(path.join(__dirname, "..", "static", "aternos", "index.html")) );
-
-    app.get("/notapi", (req, res) => res.json({ message: "Hello from server! " + new Date().getTime() }) );
 
     app.get("*", (req, res) => res.sendFile(path.join(PATH_CLIENT, "index.html")));
 

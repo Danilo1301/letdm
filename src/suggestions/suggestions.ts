@@ -115,9 +115,10 @@ export class Suggestions extends App {
 
             if(!body.sub)
             {
-                return res.status(400).send({
+                res.status(400).send({
                     error: "'sub' is not defined"
                 });
+                return;
             }
 
             const response: RetrieveUserInfo_Response = {
@@ -131,7 +132,7 @@ export class Suggestions extends App {
 
             res.send(response);   
         });
-
+        
         app.post("/api/suggestions/new", (req, res) => {
             const body: NewSugestion_PostBody = req.body;
             
@@ -139,23 +140,26 @@ export class Suggestions extends App {
 
             if(!this.authorizeKey(body.key))
             {
-                return res.status(400).send({
+                res.status(400).send({
                     error: "Invalid KEY"
                 });
+                return;
             }
             
             if(!body.sub)
             {
-                return res.status(400).send({
+                res.status(400).send({
                     error: "'sub' is not defined"
                 });
+                return;
             }
 
             if(!this.isSubAdmin(body.sub))
             {
-                return res.status(400).send({
+                res.status(400).send({
                     error: "No permission"
                 });
+                return;
             }
             
             const suggestion = this.createNewSuggestion();
@@ -179,30 +183,34 @@ export class Suggestions extends App {
 
             if(!suggestion)
             {
-                return res.status(400).send({
+                res.status(400).send({
                     error: "Sugestion ID not found"
                 });
+                return;
             }
 
             if(!this.authorizeKey(body.key))
             {
-                return res.status(400).send({
+                res.status(400).send({
                     error: "Invalid KEY"
                 });
+                return;
             }
 
             if(!body.sub)
             {
-                return res.status(400).send({
+                res.status(400).send({
                     error: "'sub' is not defined"
                 });
+                return;
             }
 
             if(!this.isSubAdmin(body.sub))
             {
-                return res.status(400).send({
+                res.status(400).send({
                     error: "No permission"
                 });
+                return;
             }
 
             suggestion.title = body.suggestion.title;
@@ -223,16 +231,18 @@ export class Suggestions extends App {
 
             if(!this.hasSuggestion(id))
             {
-                return res.status(400).send({
+                res.status(400).send({
                     error: "Sugestion ID not found"
                 });
+                return;
             }
 
             if(!this.authorizeKey(body.key))
             {
-                return res.status(400).send({
+                res.status(400).send({
                     error: "Invalid KEY"
                 });
+                return;
             }
         
             this._suggestions.delete(id);
@@ -259,9 +269,10 @@ export class Suggestions extends App {
             {
                 fs.rmSync(file.path);
 
-                return res.status(400).send({
+                res.status(400).send({
                     error: "Invalid KEY"
                 });
+                return;
             }
         
             if(fs.existsSync(PATH_SUGGESTIONS_JSON)) fs.rmSync(PATH_SUGGESTIONS_JSON);

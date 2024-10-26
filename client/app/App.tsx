@@ -18,6 +18,7 @@ import EditSuggestion from './gtasa/suggestions/EditSuggestion';
 import NewSuggestion from './gtasa/suggestions/NewSuggestion';
 import SuggestionsData from './gtasa/suggestions/SuggestionsData';
 import Key from './key/Key';
+import Tutorials from './gtasa/tutorials/Tutorials';
 
 const App: React.FC = () => {
     const [userInfo, setUserInfo] = useState<UserInfo>(defaultUserInfo);
@@ -43,6 +44,7 @@ const App: React.FC = () => {
                     <Route path="/gtasa/mods" element={<Mods/>}></Route>
                     <Route path="/gtasa/mods/android" element={<ModsAndroid/>}></Route>
                     <Route path="/gtasa/mods/pc" element={<ModsPC/>}></Route>
+                    <Route path="/gtasa/tutorials" element={<Tutorials/>}></Route>
                     <Route path="/suggestions" element={<Suggestions/>}></Route>
                     <Route path="/suggestions/:id/edit" element={<EditSuggestion/>}></Route>
                     <Route path="/suggestions/new" element={<NewSuggestion/>}></Route>
