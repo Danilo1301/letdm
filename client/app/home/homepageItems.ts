@@ -22,6 +22,17 @@ export const homePageItems: HomepageItem[] =
     },
 
     {
+        title: "GTA for Browser",
+        shortDescription: "Game made in Typescript using Phaser game engine and Three.js",
+        description: "",
+        image: "assets/thumbs/gta-browser.png",
+        pageUrl: "https://game-survival.glitch.me",
+        openNewPage: true,
+        categories: [HomepageItemCategory.GAMES, HomepageItemCategory.PRINCIPAL],
+        //videoPreviewId: "W2RUrSYOGoU",
+        //githubUrl: "https://github.com/Danilo1301/cafemania",
+    },
+    {
         title: "Cafemania",
         shortDescription: "Game made in Typescript using Phaser game engine",
         description: "",
