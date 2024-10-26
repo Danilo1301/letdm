@@ -6,7 +6,12 @@
 
 2. Enviar pelo site do Discloud
 
-# Dev
+# Build server
 
-* Iniciar "npm run dev" para testar e editar o app
-* Iniciar "npm run build" para compilar o código em "dist/index.js"
+* Iniciar "npm run server" para testar e editar o server
+* Iniciar "npm run server_build" para compilar o código em "dist/index.js"
+
+# Builc client
+
+* Rodar "npm run client" para compilar em tempo real o cliente em React
+* Rodar "npm run client_build" para compilar o cliente em modo produção
