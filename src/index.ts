@@ -26,6 +26,7 @@ import { Aternos } from './aternos';
 import { Log } from './log';
 import { SteamBot } from './steamBot';
 import { Suggestions } from './suggestions/suggestions';
+import { WatchedVideos } from "./watchedVideos/watchedVideos";
 
 const port = process.env.PORT;
 
@@ -49,6 +50,7 @@ function main()
     const autoLoginDiscordBot = true;
 
     appManager.addApp(new Suggestions("Suggestions", app, upload));
+    appManager.addApp(new WatchedVideos("WatchedVideos", app));
     appManager.addApp(new DiscordBot("DiscordBot", autoLoginDiscordBot));
     appManager.addApp(new SteamBot("SteamBot"));
     appManager.addApp(new Log("Log", app, <DiscordBot>appManager.getApp("DiscordBot")));
