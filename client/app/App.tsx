@@ -19,6 +19,7 @@ import NewSuggestion from './gtasa/suggestions/NewSuggestion';
 import SuggestionsData from './gtasa/suggestions/SuggestionsData';
 import Key from './key/Key';
 import Tutorials from './gtasa/tutorials/Tutorials';
+import Data from './data/Data';
 
 const App: React.FC = () => {
     const [userInfo, setUserInfo] = useState<UserInfo>(defaultUserInfo);
@@ -50,6 +51,7 @@ const App: React.FC = () => {
                     <Route path="/suggestions/new" element={<NewSuggestion/>}></Route>
                     <Route path="/suggestions/data" element={<SuggestionsData/>}></Route>
                     <Route path="/key" element={<Key/>}></Route>
+                    <Route path="/data" element={<Data/>}></Route>
                 </Routes>
             </BrowserRouter>
           </UserInfoContext.Provider>

@@ -27,7 +27,7 @@ function Key() {
                     <ListItem title={keyId} description="">
                         <input type="password" className="form-control" placeholder="Content" onChange={e => { setKey(e.target.value) }} value={key}></input>
                         <button onClick={updateKeyValue}>Set key</button>
-                        <span>Key: {currentKey.slice(0, 4)}********</span>
+                        <span>Key: {currentKey.length == 0 ? "NOT SET" : `${currentKey.slice(0, 4)}********`}</span>
                     </ListItem>
                 </ListItemGroup>
             </div>

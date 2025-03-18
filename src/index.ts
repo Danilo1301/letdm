@@ -27,6 +27,7 @@ import { Log } from './log';
 import { SteamBot } from './steamBot';
 import { Suggestions } from './suggestions/suggestions';
 import { WatchedVideos } from "./watchedVideos/watchedVideos";
+import { Data } from "./data/data";
 
 const port = process.env.PORT;
 
@@ -49,6 +50,7 @@ function main()
 
     const autoLoginDiscordBot = true;
 
+    appManager.addApp(new Data("Data", app, upload));
     appManager.addApp(new Suggestions("Suggestions", app, upload));
     appManager.addApp(new WatchedVideos("WatchedVideos", app));
     appManager.addApp(new DiscordBot("DiscordBot", autoLoginDiscordBot));
