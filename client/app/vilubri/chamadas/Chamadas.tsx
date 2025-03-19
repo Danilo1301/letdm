@@ -45,7 +45,7 @@ function Chamadas() {
 
     return (
         <div className='container'>
-            <a href="/">Voltar</a>
+            <a href="/vilubri/">Voltar</a>
 
             <div>{chamadas.length} chamadas</div>
 

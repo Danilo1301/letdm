@@ -1,12 +1,15 @@
 import { App } from "../app/app";
-import fs from 'fs'
-import express, { NextFunction } from 'express';
 import { PATH_DATA, PATH_UPLOADS } from "../paths";
-import path from "path";
 import { Chamada, ChamadaJSON, ChamadaPageJSON } from "./Chamada";
 import { ChamadaJSON_HomeList } from "./requestTypes";
 import { Theme, ThemeJSON } from "./Theme";
-import { Product } from "./Product";
+import { Product, ProductJSON_Changed } from "./Product";
+
+import fs from 'fs'
+import express, { NextFunction } from 'express';
+import path from "path";
+import xlsx from 'node-xlsx';
+import { ProcessPricesTableOptions } from "./processPricesTableOptions";
 
 const PATH_CHAMADAS_FILE = path.join(PATH_DATA, "vilubri", "chamadas.json");
 const PATH_THEMES_FILE = path.join(PATH_DATA, "vilubri", "themes.json");
@@ -396,6 +399,34 @@ export class Vilubri extends App
         
             res.json(product.toJSON());
         });
+
+        app.post('/api/vilubri/uploadTable', this.upload.single('file'), (req, res) => {
+            //const id = req.params.id;
+        
+            const file = (req as any).file;
+        
+            console.log(file);
+
+            const path = file.path;
+            const newPath = `${PATH_UPLOADS}/table.xlsx`;
+            
+            fs.renameSync(path, newPath);
+
+            const options: ProcessPricesTableOptions = {
+                description: req.body["description-id"],
+                code: req.body["code-id"],
+                price: req.body["price-id"],
+                minPriceChange: parseInt(req.body["min-price-change"]) || 0
+            }
+
+            const changedProducts = this.processPricesTable(newPath, options);
+
+            console.log(`Removing table...`);
+
+            fs.rmSync(newPath);
+
+            res.json(changedProducts);
+        });
     }
 
     public authorizeKey(key: string)
@@ -497,5 +528,116 @@ export class Vilubri extends App
 
             return theme;
         }
+    }
+
+    private processPricesTable(filePath: string, options: ProcessPricesTableOptions)
+    {
+        const workSheetsFromFile = xlsx.parse(filePath);
+
+        const tableIds: {[key: string]: number} = {
+          'A': 0,
+          'B': 1,
+          'C': 2,
+          'D': 3,
+          'E': 4,
+          'F': 5
+        };
+
+        const nameTableId = tableIds[options.description];
+        const codeTableId = tableIds[options.code];
+        const priceTableId = tableIds[options.price];
+
+        
+        const products: ProductJSON_Changed[] = [];
+        
+        const data = workSheetsFromFile[0].data;
+        for(const a of data)
+        {
+            if(a.length == 0) continue;
+
+            const name = a[nameTableId];
+            const code = a[codeTableId];
+            const price = parseFloat(parseFloat(a[priceTableId]).toFixed(2));
+
+            // ignore first row
+            if(a[0].toLowerCase().includes("descrição")) continue;
+            if(a[0].toLowerCase().includes("descricao")) continue;
+
+            const latestProduct = this.findLatestProduct(code);
+
+            if(latestProduct)
+            {
+                const chamada = latestProduct.chamada!;
+
+                const oldPrice = latestProduct.price;
+        
+                console.log(`Product: ${code}`);
+                console.log(`Old price:`, oldPrice);
+                console.log(`New price:`, price);
+
+                const diff = Math.abs(oldPrice - price);
+         
+                const changedPrice = diff >= options.minPriceChange;
+
+                const chamadaJson: ChamadaPageJSON = {
+                    chamada: chamada.toJSON(),
+                    theme: this.getThemeById(chamada.theme)!.data
+                };
+
+                products.push({
+                    product: latestProduct.toJSON(),
+                    chamadaData: chamadaJson,
+                    newPrice: price,
+                    newProduct: false,
+                    changedPrice: changedPrice
+                });
+
+                if(changedPrice)
+                {
+                    console.log(`Price changed!`);
+                }
+            } else {
+                console.log(`Could not find product ${code}`);
+          
+                const newProduct = new Product(name, code, "", price, false);
+          
+                products.push({
+                    product: newProduct.toJSON(),
+                    chamadaData: undefined,
+                    newPrice: price,
+                    newProduct: true,
+                    changedPrice: false
+                });
+            }
+        }
+
+        return products;
+    }
+
+    public findLatestProduct(code: string)
+    {
+        let allChamadas = Array.from(this.chamadas.values());
+
+        allChamadas = allChamadas.sort((a, b) => {
+            return a.date.getTime() - b.date.getTime()
+        });
+
+        //console.log("--")
+
+        let latestProduct: Product | undefined = undefined;
+
+        for(const chamada of allChamadas)
+        {
+            for(const product of chamada.products)
+            {
+                if(product.code != code) continue;
+
+                latestProduct = product;
+            }
+        }
+
+        //console.log(latestProduct);
+
+        return latestProduct;
     }
 }

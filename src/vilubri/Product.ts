@@ -1,4 +1,4 @@
-import { Chamada } from "./Chamada";
+import { Chamada, ChamadaPageJSON } from "./Chamada";
 
 export interface ProductJSON {
     name: string;
@@ -7,6 +7,14 @@ export interface ProductJSON {
     price: number;
     hasIPI: boolean;
     index: number;
+}
+
+export interface ProductJSON_Changed {
+    product: ProductJSON;
+    chamadaData: ChamadaPageJSON | undefined;
+    newPrice: number;
+    newProduct: boolean;
+    changedPrice: boolean;
 }
 
 export class Product {
