@@ -28,6 +28,7 @@ import { SteamBot } from './steamBot';
 import { Suggestions } from './suggestions/suggestions';
 import { WatchedVideos } from "./watchedVideos/watchedVideos";
 import { Data } from "./data/data";
+import { Vilubri } from "./vilubri/vilubri";
 
 const port = process.env.PORT;
 
@@ -48,13 +49,15 @@ function main()
     
     setupExpressApp();
 
-    const autoLoginDiscordBot = true;
+    const autoLoginDiscordBot = false;
+    const autoLoginSteamdBot = false;
 
     appManager.addApp(new Data("Data", app, upload));
+    appManager.addApp(new Vilubri("Vilubri", app, upload));
     appManager.addApp(new Suggestions("Suggestions", app, upload));
     appManager.addApp(new WatchedVideos("WatchedVideos", app));
     appManager.addApp(new DiscordBot("DiscordBot", autoLoginDiscordBot));
-    appManager.addApp(new SteamBot("SteamBot"));
+    appManager.addApp(new SteamBot("SteamBot", autoLoginSteamdBot));
     appManager.addApp(new Log("Log", app, <DiscordBot>appManager.getApp("DiscordBot")));
 
     appManager.addApp(new Aternos("Aternos", app));

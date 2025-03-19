@@ -14,12 +14,15 @@ import { getCookie } from '../components/cookies';
 import { cookieName_access_token } from '..';
 
 import './App.css';
+import './Vilubri.css';
 import EditSuggestion from './gtasa/suggestions/EditSuggestion';
 import NewSuggestion from './gtasa/suggestions/NewSuggestion';
 import SuggestionsData from './gtasa/suggestions/SuggestionsData';
 import Key from './key/Key';
 import Tutorials from './gtasa/tutorials/Tutorials';
 import Data from './data/Data';
+import Vilubri from './vilubri/Vilubri';
+import VilubriRoutes from './vilubri/VilubriRoutes';
 
 const App: React.FC = () => {
     const [userInfo, setUserInfo] = useState<UserInfo>(defaultUserInfo);
@@ -53,6 +56,7 @@ const App: React.FC = () => {
                     <Route path="/key" element={<Key/>}></Route>
                     <Route path="/data" element={<Data/>}></Route>
                 </Routes>
+                <VilubriRoutes></VilubriRoutes>
             </BrowserRouter>
           </UserInfoContext.Provider>
         </>

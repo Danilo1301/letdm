@@ -7,10 +7,13 @@ export class SteamBot extends App {
     public get client() { return this._client; }
 
     private _client;
+    private _autoLogin: boolean;
 
-    constructor(id: string)
+    constructor(id: string, autoLogin: boolean)
     {
         super(id);
+
+        this._autoLogin = autoLogin;
 
         const client = this._client = new SteamUser();
 
@@ -47,9 +50,11 @@ export class SteamBot extends App {
     {
         const code = SteamTotp.generateAuthCode(process.env.STEAM_SHARED_SECRET);
 
-        console.log(`[SteamBot] login cancelled, code: ${code}`);
-
-        return;
+        if(this._autoLogin == false)
+        {
+            console.log(`[SteamBot] login cancelled, code: ${code}`);
+            return;
+        }
 
         //console.log(process.env.STEAM_SHARED_SECRET)
         //console.log(code)
