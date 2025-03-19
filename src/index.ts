@@ -44,6 +44,7 @@ const upload = multer({ dest: "uploads/" });
 function main()
 {
     console.log("[index] main");
+    console.log("[index] Build 19/03/25 18:55");
 
     setupDataFolder();
     

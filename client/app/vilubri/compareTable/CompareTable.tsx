@@ -98,7 +98,7 @@ function CompareTable()
 
     return (
         <>
-            <a href="/">Voltar</a>
+            <a href="/vilubri/">Voltar</a>
 
             <form action="/api/vilubri/uploadTable" method="post" onSubmit={handleSubmit} className='mb-3'>
                 <span>Selecione a tabela de preços (.xlsx):</span>
@@ -132,13 +132,14 @@ function CompareTable()
 
 function ChangedProduct({product}: { product: ProductJSON_Changed })
 {
-    const diff = Math.abs(product.product.price - product.newPrice);
+    const diff = product.newPrice - product.product.price;
+    const diffAbs = Math.abs(diff);
 
     return (
         <>
             <div>
                 <span>{product.product.code} - {product.product.name}</span>
-                <span style={{marginLeft: "5px", color: "orange"}}>({Product.formatPriceWithIPI(diff, false)})</span>
+                <span style={{marginLeft: "5px", color: diff > 0 ? "#1fd91f" : "orange"}}>({(diff > 0 ? "subiu " : "caiu ") + Product.formatPriceWithIPI(diffAbs, false)})</span>
             </div>
         </>
     );

@@ -45,6 +45,10 @@ export class Vilubri extends App
             res.json({test: 123});
         });
 
+        app.get('/api/vilubri/themes', async (req, res) => {
+            res.json(this.themes);
+        });
+
         app.get('/api/vilubri/chamadas', (req, res) => {
             res.json(this.getChamadaHomeList());
         })
@@ -83,7 +87,7 @@ export class Vilubri extends App
         
             console.log(req.url)
             console.log("body:", req.body);
-        
+            
             if(!this.authorizeKey(key))
             {
               res.status(500).send({ error: "Wrong authentication key" });
@@ -104,6 +108,40 @@ export class Vilubri extends App
         
             console.log(chamada.toJSON());
         
+            res.json(chamada.toJSON());
+        });
+
+        app.post('/api/vilubri/chamadas/:id/changeTheme', (req, res) => {
+            const id = req.params.id;
+            const key: string = req.body.key;
+            const themeId: string = req.body.themeId;
+            
+            if(!this.authorizeKey(key))
+            {
+              res.status(500).send({ error: "Wrong authentication key" });
+              return;
+            }
+        
+            const chamada = this.chamadas.get(id);
+        
+            if(!chamada)
+            {
+              res.status(500).send({ error: "Could not find chamada ID " + id });
+              return;
+            }
+
+            const theme = this.getThemeById(themeId);
+            
+            if(!theme)
+            {
+                res.status(500).send({ error: "Invalid theme ID " + themeId });
+                return;
+            }
+
+            chamada.theme = theme.id;
+        
+            this.saveData();
+
             res.json(chamada.toJSON());
         });
 
@@ -407,6 +445,12 @@ export class Vilubri extends App
         
             console.log(file);
 
+            if(file == undefined)
+            {
+                res.status(500).send({ error: "You did not upload a table" });
+                return;
+            }
+
             const path = file.path;
             const newPath = `${PATH_UPLOADS}/table.xlsx`;
             
@@ -416,16 +460,21 @@ export class Vilubri extends App
                 description: req.body["description-id"],
                 code: req.body["code-id"],
                 price: req.body["price-id"],
-                minPriceChange: parseInt(req.body["min-price-change"]) || 0
+                minPriceChange: parseFloat(req.body["min-price-change"]) || 0
             }
 
-            const changedProducts = this.processPricesTable(newPath, options);
+            try {
+                const changedProducts = this.processPricesTable(newPath, options);
+
+                res.json(changedProducts);
+            } catch (error) {
+
+                res.status(500).send({ error: "Error processing the table" });
+            }
 
             console.log(`Removing table...`);
 
             fs.rmSync(newPath);
-
-            res.json(changedProducts);
         });
     }
 
@@ -511,7 +560,8 @@ export class Vilubri extends App
                 id: chamada.id,
                 numProducts: chamada.products.length,
                 date: chamada.date.getTime(),
-                completed: chamada.isCompleted
+                completed: chamada.isCompleted,
+                theme: this.getThemeById(chamada.theme)!.data
             };
             
             items.push(item);
@@ -571,13 +621,19 @@ export class Vilubri extends App
 
                 const oldPrice = latestProduct.price;
         
-                console.log(`Product: ${code}`);
-                console.log(`Old price:`, oldPrice);
-                console.log(`New price:`, price);
+                
 
                 const diff = Math.abs(oldPrice - price);
          
                 const changedPrice = diff >= options.minPriceChange;
+
+                if(changedPrice)
+                {
+                    console.log(`Product: ${code}`);
+                    console.log(`Old price:`, oldPrice);
+                    console.log(`New price:`, price);
+                    console.log(`Diff: ${diff} >= ${options.minPriceChange}`);
+                }
 
                 const chamadaJson: ChamadaPageJSON = {
                     chamada: chamada.toJSON(),

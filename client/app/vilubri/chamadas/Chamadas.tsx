@@ -14,7 +14,8 @@ function ChamadaItem({chamada}: { chamada: ChamadaJSON_HomeList }) {
                     {dateStr}
                 </div>
                 <div className="col-auto">
-                <a href={url}>Chamada {chamada.id}</a>
+                    <span style={{backgroundColor: chamada.theme.navColor, paddingLeft: "10px", paddingRight: "10px", marginRight: "5px"}}></span>
+                    <a href={url}>Chamada {chamada.id}</a>
                 </div>
                 {!chamada.completed ?
                 <>

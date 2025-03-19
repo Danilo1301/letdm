@@ -20,7 +20,8 @@ module.exports = {
     'request': 'commonjs request',
     'socket.io': 'commonjs socket.io',
     'steam-user': 'commonjs steam-user',
-    'web-streams-polyfill': 'commonjs web-streams-polyfill'
+    'web-streams-polyfill': 'commonjs web-streams-polyfill',
+    'unzipper': 'commonjs unzipper'
   },
   module: {
     rules: [

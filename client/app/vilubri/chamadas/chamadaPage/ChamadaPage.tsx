@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { ChamadaJSON, ChamadaPageJSON } from '../../../../../src/vilubri/Chamada';
 import { Product, ProductJSON } from '../../../../../src/vilubri/Product';
 import { getLetDM_Key } from '../../../../components/cookies';
-import { ThemeJSON } from '../../../../../src/vilubri/Theme';
+import { Theme, ThemeJSON } from '../../../../../src/vilubri/Theme';
 import { defaultTheme, ThemeContext } from './ColorSettings';
 import { showConfirmWindow } from '../../Vilubri';
 
@@ -235,6 +235,78 @@ function ChamadaPage() {
         });
     }
 
+    const sendChangeThemeRequest = (themeId: string) => {
+        const key = getLetDM_Key();
+
+        const body: any = {
+            key: key,
+            themeId: themeId
+        }
+    
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        };
+    
+        console.log('requestOptions:', requestOptions)
+
+        fetch('/api/vilubri/chamadas/' + globalChamadaId + '/changeTheme', requestOptions)
+        .then(response => {
+            response.json().then(data => {
+                if(response.ok)
+                {
+                    console.log(data);
+    
+                    window.location.reload();
+                    return;
+                }
+                alert(data.error)
+            })
+        });
+    }
+
+    const changeTheme = () => {
+
+        var themeId = prompt("Insira o ID do tema:");
+
+        if(typeof themeId != "string") return;
+
+        fetch('/api/vilubri/themes')
+        .then(response => {
+            response.json().then(data => {
+
+                console.log(data);
+
+                if(response.ok)
+                {
+                    const themes: Theme[] = data;
+
+                    let newTheme: Theme | undefined;
+
+                    for(const theme of themes)
+                    {
+                        if(theme.id != themeId) continue;
+
+                        newTheme = theme;
+                        break;
+                    }
+
+                    if(newTheme == undefined)
+                    {
+                        alert("Tema inválido!");
+                        return;
+                    }
+
+                    sendChangeThemeRequest(newTheme.id);
+
+                    return;
+                }
+                alert(data.error);
+            })
+        });
+    }
+
     React.useEffect(() => {
         getChamada(id).then(data => {
             console.log(data);
@@ -313,6 +385,7 @@ function ChamadaPage() {
             </div>
                     
             <a className='btn btn-primary mt-4 mb-4' href={newProductUrl}>Adicionar produto</a>
+            <a className='btn btn-secondary mt-4 mb-4' style={{marginLeft: "10px"}} onClick={changeTheme}>Mudar tema</a>
 
             <div className="form-check">
                 <input className="form-check-input" type="checkbox" value="" checked={isSmallProductChecked} onChange={e => setIsSmallProductChecked(!isSmallProductChecked)}></input>
