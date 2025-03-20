@@ -111,6 +111,31 @@ export class Vilubri extends App
             res.json(chamada.toJSON());
         });
 
+        app.post('/api/vilubri/chamadas/:id/changeDate', (req, res) => {
+            const id = req.params.id;
+            const key: string = req.body.key;
+        
+            if(!this.authorizeKey(key))
+            {
+              res.status(500).send({ error: "Wrong authentication key" });
+              return;
+            }
+        
+            const chamada = this.chamadas.get(id);
+        
+            if(!chamada)
+            {
+              res.status(500).send({ error: "Could not find chamada ID " + id });
+              return;
+            }
+        
+            chamada.date = new Date();
+        
+            this.saveData();
+        
+            res.json(chamada.toJSON());
+        });
+
         app.post('/api/vilubri/chamadas/:id/changeTheme', (req, res) => {
             const id = req.params.id;
             const key: string = req.body.key;

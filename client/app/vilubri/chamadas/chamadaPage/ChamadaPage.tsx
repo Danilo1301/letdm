@@ -236,6 +236,9 @@ function ChamadaPage() {
     }
 
     const sendChangeThemeRequest = (themeId: string) => {
+
+        if(!showConfirmWindow()) return
+
         const key = getLetDM_Key();
 
         const body: any = {
@@ -300,6 +303,37 @@ function ChamadaPage() {
 
                     sendChangeThemeRequest(newTheme.id);
 
+                    return;
+                }
+                alert(data.error);
+            })
+        });
+    }
+
+    const changeDate = () => {
+        
+        if(!showConfirmWindow()) return
+
+        const key = getLetDM_Key();
+
+        const body: any = {
+            key: key
+        }
+    
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        };
+    
+        console.log('requestOptions:', requestOptions)
+
+        fetch('/api/vilubri/chamadas/' + globalChamadaId + '/changeDate', requestOptions)
+        .then(response => {
+            response.json().then(data => {
+                if(response.ok)
+                {
+                    window.location.reload();
                     return;
                 }
                 alert(data.error);
@@ -386,6 +420,7 @@ function ChamadaPage() {
                     
             <a className='btn btn-primary mt-4 mb-4' href={newProductUrl}>Adicionar produto</a>
             <a className='btn btn-secondary mt-4 mb-4' style={{marginLeft: "10px"}} onClick={changeTheme}>Mudar tema</a>
+            <a className='btn btn-secondary mt-4 mb-4' style={{marginLeft: "10px"}} onClick={changeDate}>Mudar data de modificação</a>
 
             <div className="form-check">
                 <input className="form-check-input" type="checkbox" value="" checked={isSmallProductChecked} onChange={e => setIsSmallProductChecked(!isSmallProductChecked)}></input>
