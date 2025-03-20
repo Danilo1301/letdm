@@ -44,13 +44,13 @@ const upload = multer({ dest: "uploads/" });
 function main()
 {
     console.log("[index] main");
-    console.log("[index] Build 19/03/25 18:55");
+    console.log("[index] Build 20/03/25 17:34");
 
     setupDataFolder();
     
     setupExpressApp();
 
-    const autoLoginDiscordBot = false;
+    const autoLoginDiscordBot = true;
     const autoLoginSteamdBot = false;
 
     appManager.addApp(new Data("Data", app, upload));

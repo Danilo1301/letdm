@@ -34,7 +34,12 @@ export class Vilubri extends App
     {
         super.start();
 
-        console.log(`\n\n[Vilubri] start`);
+        console.log(`[Vilubri] start`);
+    }
+
+    public load()
+    {
+        super.load();    
 
         this.loadData();
     }
@@ -520,8 +525,6 @@ export class Vilubri extends App
 
         const data: {[key: string]: ThemeJSON} = JSON.parse(fs.readFileSync(PATH_THEMES_FILE, "utf-8"));
 
-        console.log(data);
-
         for(const id in data)
         {
             let theme: Theme = {
@@ -535,10 +538,6 @@ export class Vilubri extends App
 
     public loadChamadas()
     {
-        console.log("Loading data");
-
-        console.log(PATH_CHAMADAS_FILE);
-
         if(!fs.existsSync(PATH_CHAMADAS_FILE)) return;
 
         const data: {[key: string]: ChamadaJSON} = JSON.parse(fs.readFileSync(PATH_CHAMADAS_FILE, "utf-8"));
