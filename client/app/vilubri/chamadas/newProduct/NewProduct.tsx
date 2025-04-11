@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getLetDM_Key } from '../../../../components/cookies';
-import { Product } from '../../../../../src/vilubri/Product';
+import { Product, ProductJSON } from '../../../../../src/vilubri/Product';
 import { showConfirmWindow } from '../../Vilubri';
 
 export const ImageUpload = () => {
@@ -52,8 +52,16 @@ function NewProduct() {
     const [name, setName] = React.useState("");
     const [description, setDescription] = React.useState("");
     const [price, setPrice] = React.useState("R$ 0,00");
+    const [copyFromCode, setCopyFromCode] = React.useState("");
 
     const postUrl = `/api/vilubri/chamadas/${id}/products/new`;
+
+    React.useEffect(() => {
+        var str = localStorage.getItem("last_product");
+        
+        if(str)
+            setCopyFromCode(str);
+    }, []);
 
     const handleSubmit = (event: any) => {
 
@@ -89,6 +97,30 @@ function NewProduct() {
         event.preventDefault();
     }
 
+    const handleCopyFromCode = () => {
+
+        const code = copyFromCode;
+
+        fetch('/api/vilubri/product/' + code)
+        .then(response => {
+            response.json().then(data => {
+
+                console.log(data);
+
+                if(response.ok)
+                {
+                    const productJson: ProductJSON = data;
+
+                    setName(productJson.name);
+                    setDescription(productJson.description);
+
+                    return;
+                }
+                alert(data.error);
+            })
+        });
+    }
+
     return (
         <div className='container'>
             <a href={backUrl}>Voltar</a>
@@ -97,7 +129,10 @@ function NewProduct() {
 
                 <div className=''>
                     <span>Código:</span>
-                    <input type="number" name="code" className="form-control" placeholder="" onChange={e => setCode(e.target.value)} value={code}></input>
+                    <input type="number" name="code" className="form-control" placeholder="" onChange={e => {
+                        setCode(e.target.value);
+                        localStorage.setItem('last_product', e.target.value);
+                    }} value={code}></input>
                 </div>
 
                 <div className=''>
@@ -108,6 +143,12 @@ function NewProduct() {
                 <div className=''>
                     <span>Descrição:</span>
                     <textarea name="description" className="form-control" cols={40} rows={10} onChange={e => setDescription(e.target.value)} value={description}></textarea>
+                </div>
+
+                <div className=''>
+                    <span>Copiar do código:</span>
+                    <input type="number" name="copy-code" className="" placeholder="" onChange={e => setCopyFromCode(e.target.value)} value={copyFromCode}></input>
+                    <button type="button" onClick={handleCopyFromCode}>Copiar</button>
                 </div>
 
                 <div className=''>
@@ -125,6 +166,8 @@ function NewProduct() {
                     <span>Imagem:</span>
                     <ImageUpload></ImageUpload>
                 </div>
+
+                <br></br>
 
                 <input type="submit" value="Enviar" />
             </form>

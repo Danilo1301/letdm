@@ -210,6 +210,35 @@ export class Vilubri extends App
             res.json({});
         });
 
+        app.get('/api/vilubri/product/:code', (req, res) => {
+            const code = req.params.code;
+            
+            let product: Product | undefined;
+
+            for(const chamada of this.chamadas.values())
+            {
+                for(const p of chamada.products)
+                {
+                    if(p.code == code)
+                    {
+                        product = p;
+                        break;
+                    }
+                }
+
+            }
+        
+            if(!product)
+            {
+                res.status(500).send({ error: "Could not find product" });
+                return;
+            }
+
+            var json = product.toJSON()
+
+            res.json(json);
+        });
+
         app.post('/api/vilubri/chamadas/:id/products/:productIndex/changeIndex', (req, res) => {
             const id = req.params.id;
             const productIndex = parseInt(req.params.productIndex);
