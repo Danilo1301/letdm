@@ -9,6 +9,7 @@ import { defaultTheme, ThemeContext } from './chamadas/chamadaPage/ColorSettings
 import EditProduct from './chamadas/newProduct/EditProduct';
 import NewProduct from './chamadas/newProduct/NewProduct';
 import CompareTable from './compareTable/CompareTable';
+import SearchProducts from './searchProducts/SearchProducts';
 
 function VilubriRoutes() {
     return (
@@ -22,6 +23,8 @@ function VilubriRoutes() {
             <Route path="/vilubri/chamadas/:id" element={<ChamadaPage/>} />
 
             <Route path="/vilubri/compareTable" element={<CompareTable/>} />
+
+            <Route path="/vilubri/searchProducts" element={<SearchProducts/>} />
         </Routes>
     );
 }

@@ -20,6 +20,9 @@ function Vilubri() {
                 <div className='mb-3'>
                     <a href="/vilubri/compareTable">Comparar tabela</a>
                 </div>
+                <div className='mb-3'>
+                    <a href="/vilubri/searchProducts">Procurar produtos</a>
+                </div>
             </div>
         </>
     );
