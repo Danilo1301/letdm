@@ -71,10 +71,13 @@ export class WatchedVideos extends App
 
             const body = req.body;
             
-            //console.log(body);
+            console.log(`Recebido '/api/videos/process'`);
 
             if(!Array.isArray(body))
             {
+                console.log(`Body invalido`);
+                console.log(body);
+
                 res.status(400).send({
                     error: "Invalid body"
                 });
@@ -92,8 +95,11 @@ export class WatchedVideos extends App
 
                 if(id == undefined || title == undefined || progress == undefined || channel == undefined)
                 {
+                    console.log(`Missing information`);
+                    console.log(body);
+
                     res.status(400).send({
-                        error: "Invalid body"
+                        error: "Missing information"
                     });
                     return;
                 }
