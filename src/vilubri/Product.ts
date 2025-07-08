@@ -43,7 +43,7 @@ export class Product {
             description: this.description,
             price: this.price,
             hasIPI: this.hasIPI,
-            index: this.chamada?.products.indexOf(this) || 0
+            index: this.chamada ? this.chamada.findProductIndex(this) : -1
         }
 
         return json;
