@@ -10,6 +10,14 @@ type ChamadaTableProps = {
   chamada: ChamadaJSON; // Substitua com o tipo correto
 };
 
+export type Dado = {
+    descricao: string;
+    codigo: string;
+    preco: number;
+    temIPI: boolean;
+    tabelaIndex: number;
+};
+
 const ChamadaTable: React.FC<ChamadaTableProps> = ({ chamada }) =>
 {
     const id = chamada.id;
@@ -26,18 +34,18 @@ const ChamadaTable: React.FC<ChamadaTableProps> = ({ chamada }) =>
     const createdTimeStr = createdDatte.toLocaleTimeString();
     
     const [items, setItems] = useState("");
-    const [tableIndex, setTableIndex] = useState(0);
 
-    const handleAddItems = () => {
+    const [dados, setDados] = useState<Dado[][]>([]);
+
+    const handleSaveItems = () => {
         try {
-            const dados = parseDados();
+            const dados = parseDados(items);
             
             const key = getLetDM_Key();
             
             const body: any = {
                 id: chamada.id,
                 key: key,
-                tableIndex: tableIndex,
                 data: dados
             }
 
@@ -66,21 +74,69 @@ const ChamadaTable: React.FC<ChamadaTableProps> = ({ chamada }) =>
         }
     }
 
-    const parseDados = () => {
-        const linhas = items.split('\n'); // separa por linha
+    const parseDados = (text: string) => {
+        const tabelasBrutas = text.split(/\n\s*\n/); // separa as tabelas por linhas vazias
+        const tabelas = tabelasBrutas.map((tabelaTexto, tabelaIndex) => {
+            const linhas = tabelaTexto.trim().split('\n');
 
-        const dados = linhas.map(linha => {
-            const [descricao, codigo, preco] = linha.split('\t');
-            return {
-                descricao,
-                codigo,
-                preco: parsePreco(preco), // converte para número (caso venha com vírgula)
-                temIPI: preco.toLowerCase().includes("ipi")
-            };
+            const dados = linhas.map(linha => {
+                const [descricao, codigo, preco] = linha.split('\t');
+                return {
+                    descricao,
+                    codigo,
+                    preco: parsePreco(preco),
+                    temIPI: preco.toLowerCase().includes("ipi"),
+                    tabelaIndex
+                } as Dado;
+            });
+
+            return dados;
         });
 
-        return dados;
-    }
+        // Junta todas as tabelas em um único array
+        return tabelas;
+    };
+
+    const tryUpdateItems = (text: string) => {
+    
+        console.log(text);
+
+        setItems(text);
+
+        try {
+            const dados = parseDados(text);
+            
+            console.log(dados);
+
+            setDados(dados);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    React.useEffect(() => {
+
+        let str = "";
+
+        for (let tableIndex = 0; tableIndex < chamada.productTables.length; tableIndex++) {
+            const table = chamada.productTables[tableIndex];
+
+            for (let i = 0; i < table.length; i++) {
+                const product = table[i];
+                const preco = `R$ ${product.price.toFixed(2).replace('.', ',')}`;
+                const linha = `${product.name}\t${product.code}\t${preco}${product.hasIPI ? ' + IPI' : ''}`;
+                str += linha + '\n';
+            }
+
+            // Linha vazia após cada tabela (menos após a última)
+            if (tableIndex < chamada.productTables.length - 1) {
+                str += '\n';
+            }
+        }
+
+        tryUpdateItems(str);
+    }, []);
+
 
     const dateTopOptions: Intl.DateTimeFormatOptions = { year: '2-digit', month: 'numeric', day: 'numeric' };
     const dateTopStr = date.toLocaleDateString("pt-BR", dateTopOptions);
@@ -120,20 +176,16 @@ const ChamadaTable: React.FC<ChamadaTableProps> = ({ chamada }) =>
 
                 <div className='mt-4 mb-4'>
                     <div className=''>
-                        <span>Adicionar itens, separados por TAB</span>
+                        <span>Lista de itens</span>
                         <textarea
                             className="form-control"
                             placeholder="Digite algo..."
-                            rows={5} // número de linhas visíveis
-                            onChange={e => setItems(e.target.value)}
+                            rows={10} // número de linhas visíveis
+                            onChange={e => tryUpdateItems(e.target.value)}
                             value={items}
                         />
                     </div>
-                    <div className=''>
-                        <span>Índice da tabela:</span>
-                        <input type="number" className="form-control" placeholder="ID da chamada" onChange={e => setTableIndex(parseInt(e.target.value))} value={tableIndex}></input>
-                    </div>
-                    <button type="button" className="btn btn-primary" onClick={handleAddItems}>Adicionar itens</button>
+                    <button type="button" className="btn btn-primary" onClick={handleSaveItems}>Salvar</button>
                 </div>
 
                 <div className='mt-4 mb-4' style={{backgroundColor: theme.backgroundColor}}>
@@ -161,7 +213,7 @@ const ChamadaTable: React.FC<ChamadaTableProps> = ({ chamada }) =>
                     </div>
                 </div>
 
-                {chamada.productTables.map((tabela, index) => (
+                {dados.map((tabela, index) => (
                     <div key={index} className="mb-4">
                     <h5>Tabela {index}</h5>
                     <table className="table table-bordered table-striped">
@@ -173,11 +225,11 @@ const ChamadaTable: React.FC<ChamadaTableProps> = ({ chamada }) =>
                         </tr>
                         </thead>
                         <tbody>
-                        {tabela.map((produto, i) => (
+                        {tabela.map((dado, i) => (
                             <tr key={i}>
-                            <td>{produto.name}</td>
-                            <td>{produto.code}</td>
-                            <td>R$ {produto.price.toFixed(2)}{produto.hasIPI ? ' + IPI' : ''}</td>
+                            <td>{dado.descricao}</td>
+                            <td>{dado.codigo}</td>
+                            <td>R$ {dado.preco.toFixed(2)}{dado.temIPI ? ' + IPI' : ''}</td>
                             </tr>
                         ))}
                         </tbody>

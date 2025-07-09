@@ -92,7 +92,7 @@ function NewProduct() {
                         localStorage.setItem('last_product', e.target.value);
                     }} value={productCode}></input>
                     
-                    <button onClick={handleFindProduct}>Procurar {productCode}</button>
+                    <button type="button" onClick={handleFindProduct}>Procurar {productCode}</button>
                 </div>
 
                 <div className=''>

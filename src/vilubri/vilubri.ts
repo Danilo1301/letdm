@@ -10,6 +10,7 @@ import express, { NextFunction } from 'express';
 import path from "path";
 import xlsx from 'node-xlsx';
 import { ProcessPricesTableOptions } from "./processPricesTableOptions";
+import { Dado } from "../../client/app/vilubri/chamadas/chamada/ChamadaTable";
 
 const PATH_CHAMADAS_FILE = path.join(PATH_DATA, "vilubri", "chamadas.json");
 const PATH_OLD_CHAMADAS_FILE = path.join(PATH_DATA, "vilubri", "old_chamadas.json");
@@ -171,9 +172,8 @@ export class Vilubri extends App
 
             const key: string = body.key;
             const id: string = body.id;
-            const tableIndex: number = body.tableIndex;
-            const data: any = body.data;
-
+            const data = (body.data as Dado[][]).flat();
+        
             console.log(data);
 
             const chamada = this.chamadas.get(id);
@@ -184,17 +184,18 @@ export class Vilubri extends App
                 return;
             }
 
-            if(tableIndex > chamada.productTables.length)
-            {
-                res.status(500).send({ error: "Invalid table index" });
-                return;
-            }
+            // if(data.tabelaIndex > chamada.productTables.length)
+            // {
+            //     res.status(500).send({ error: "Invalid table index" });
+            //     return;
+            // }
 
-            for(const productData of data)
+            chamada.productTables = [];
+            for(const dado of data)
             {
-                const product = new Product(productData.descricao, productData.codigo, "", productData.preco, productData.temIPI);
+                const product = new Product(dado.descricao, dado.codigo, "", dado.preco, dado.temIPI);
 
-                chamada.addProductToTable(tableIndex, product);
+                chamada.addProductToTable(dado.tabelaIndex, product);
             }
 
             this.saveChamadas();
