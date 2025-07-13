@@ -1,6 +1,6 @@
 import React from 'react';
-import { ListItemGroup } from '../components/list/ListItemGroup';
-import { ListItem } from '../components/list/ListItem';
+import { HomeItem } from '../home/Home';
+import Divider from '../components/Divider';
 
 function GTASA() {
 
@@ -12,13 +12,32 @@ function GTASA() {
                     <a href="/">Back</a>
                 </div>
 
-                <ListItemGroup title="GTA SA">
-                    <ListItem title="Mods Android" href="/gtasa/mods/android" selectable={true} description=""></ListItem>
-                    <ListItem title="Mods PC" href="/gtasa/mods/pc" selectable={true} description=""></ListItem>
-                    <ListItem title="Tutorials" href="/gtasa/tutorials" selectable={true} description="Tutoriais GTA SA"></ListItem>
-                    <ListItem title="Suggestions" href="/suggestions" selectable={true} description="Add/view mods suggestions"></ListItem>
-                    <ListItem image="assets/giroflex_e_leds.png" title="Lighbars and LEDs" href="https://gtasa-files.glitch.me" selectable={true} description="Download .dff models for GTA SA"></ListItem>
-                </ListItemGroup>
+                <div>
+                    <HomeItem
+                        title={'GTA Mods (Android)'}
+                        description={'GTA SA mods for mobile'}
+                        image={'assets\\projectThumbs\\gtasa_mods_mobile.png'}
+                        href='/gtasa/mobile/mods'
+                    ></HomeItem>
+
+                    <Divider></Divider>
+
+                    <HomeItem
+                        title={'GTA Mods (PC)'}
+                        description={'GTA SA mods for mobile'}
+                        image={'assets\\projectThumbs\\gtasa_mods_pc.png'}
+                        href='/gtasa/pc/mods'
+                    ></HomeItem>
+
+                    <Divider></Divider>
+
+                    <HomeItem
+                        title={'Pattern helper'}
+                        description={'Pattern helper for GTA SA mod called GiroflexVSL'}
+                        image={'assets\\projectThumbs\\gtasa_mods_pc.png'}
+                        href='/gtasa/patterns'
+                    ></HomeItem>
+                </div>
             </div>
         </>
     );

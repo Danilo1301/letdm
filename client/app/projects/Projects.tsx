@@ -1,22 +1,24 @@
-import React from 'react';
-import { HomepageItemCardList } from '../home/components/HomepageItemCardList';
-import { HomepageItemCategory } from '../home/HomepageItem';
+import React, { useContext, useEffect, useState } from 'react';
+import { projects as allProjects, ProjectType } from '../components/project/projects';
+import { ProjectItem } from '../components/project/ProjectItem';
+import Divider from '../components/Divider';
 
-function Projects() {
-
+const Projects: React.FC = () => {
+    
+    const projects = allProjects.filter(p => p.type.includes(ProjectType.Projects));
+    
     return (
         <>
-            <div className="container mt-4">
-                
-                <div className="back">
-                    <a href="/">Back</a>
-                </div>
+            <div className='container mt-2'>
 
-                <HomepageItemCardList title="Main Projects" category={HomepageItemCategory.PRINCIPAL}></HomepageItemCardList>
-                <HomepageItemCardList title="Games" category={HomepageItemCategory.GAMES}></HomepageItemCardList>
-                <HomepageItemCardList title="Projects" category={HomepageItemCategory.PROJECTS}></HomepageItemCardList>
-                <HomepageItemCardList title="GTA SA Mods" category={HomepageItemCategory.GTA_SA_MODS}></HomepageItemCardList>
-                <HomepageItemCardList title="Scratch" category={HomepageItemCategory.SCRATCH}></HomepageItemCardList>
+                {projects.map((project, index) => {
+                    return <div key={index}>
+                        <ProjectItem
+                            project={project}
+                        />
+                        <Divider></Divider>
+                    </div>
+                })}
             </div>
         </>
     );

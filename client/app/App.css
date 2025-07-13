@@ -1,43 +1,55 @@
-.back {
-    margin-bottom: 20px;
-    background-color: #dbedff;
+body {
+    background-color: #1A1A1E;
+    color: white;
 }
 
-.item_selectable {
-    background: white;
+html, body, #root {
+  height: 100%;
+  margin: 0;
 }
 
-.item_selectable:hover {
-    background: #b2b4e5;
+.navbar {
+    background-color: #272759;
+    color: white;
 }
 
-.suggestion-tag {
-    background-color: rgb(217, 217, 217);
-    color: black;
-    margin: 3px;
-    cursor: pointer;
-    padding: 0 8px 0 8px;
-    border-radius: 20px;
+.navbar-title {
+  text-decoration: none; /* remove sublinhado */
+  color: inherit;        /* usa a cor do pai */
 }
 
-.suggestion-tag.enabled {
-    background-color: #b0a9ff;
+.custom-sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100vh;
+  background-color: #f8f9fa;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  transition: left 0.3s ease;
+  z-index: 1040;
 }
 
-.suggestion-date {
-    color: gray;
-    font-size: 14px;
+.custom-sidebar.open {
+  left: 0;
 }
 
-.suggestion-content {
-    padding: 5px;
+/* Botão de fechar no canto superior direito */
+.btn-close-sidebar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
-.suggestion-status {
-    width: 20px;
-    background-color: gray;
+.home_item {
+  background-color: #373737;
+  border-radius: 10px;
 }
 
-.suggestion-status.completed {
-    background-color: green;
+.home_item:hover {
+  background-color: #545454;
+  cursor: pointer;
 }

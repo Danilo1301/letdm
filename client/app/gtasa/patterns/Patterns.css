@@ -1,0 +1,14 @@
+.led {
+    background-color: red;
+    padding: 5px 5px 5px 5px;
+    width: 40px;
+    border-radius: 10px;
+}
+
+.led-inside
+{
+    padding: 5px;
+    width: 30px;
+    background-color: white;
+    border-radius: 5px;
+}

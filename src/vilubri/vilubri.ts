@@ -37,6 +37,9 @@ export class Vilubri extends App
         super.start();
 
         console.log(`[Vilubri] start`);
+
+        var product = this.getMostRecentProduct("1798");
+        console.log(product);
     }
 
     public load()
@@ -44,6 +47,32 @@ export class Vilubri extends App
         super.load();    
 
         this.loadData();
+    }
+
+    public getMostRecentProduct(code: string)
+    {
+        let mostRecentChamada: Chamada | undefined = undefined;
+
+        for (const chamada of this.chamadas.values()) {
+
+            if(!chamada.hasProductCode(code))
+                continue;
+
+            if (
+                !mostRecentChamada ||
+                new Date(chamada.date) > mostRecentChamada.date
+            ) {
+                mostRecentChamada = chamada;
+            }
+        }
+        console.log(mostRecentChamada);
+
+        if(mostRecentChamada == undefined)
+        {
+            return undefined;
+        }
+
+        return mostRecentChamada.getProductByCode(code);
     }
 
     public setupRoutes(app: express.Application)
@@ -593,6 +622,148 @@ export class Vilubri extends App
         
             res.json(req.body);
         });
+
+        app.post('/api/vilubri/uploadTable', this.upload.single('file'), (req, res) => {
+            //const id = req.params.id;
+        
+            const file = (req as any).file;
+        
+            console.log(file);
+
+            if(file == undefined)
+            {
+                res.status(500).send({ error: "You did not upload a table" });
+                return;
+            }
+
+            const path = file.path;
+            const newPath = `${PATH_UPLOADS}/table.xlsx`;
+            
+            fs.renameSync(path, newPath);
+
+            const options: ProcessPricesTableOptions = {
+                description: req.body["description-id"],
+                code: req.body["code-id"],
+                price: req.body["price-id"],
+                minPriceChange: parseFloat(req.body["min-price-change"]) || 0
+            }
+
+            try {
+                const changedProducts = this.processPricesTable(newPath, options);
+
+                res.json(changedProducts);
+            } catch (error) {
+
+                res.status(500).send({ error: "Error processing the table" });
+            }
+
+            console.log(`Removing table...`);
+
+            fs.rmSync(newPath);
+        });
+
+        app.post('/api/vilubri/searchProductsByCode', this.upload.single('file'), (req, res) => {
+            const name: string = req.body.name;
+        
+            console.log(req.url)
+            console.log("body:", req.body);
+        
+            const json: ChamadaJSON[] = [];
+        
+            for(const chamada of this.chamadas.values())
+            {
+                console.log(`Loopíng products for chamada ${chamada.id}...`);
+                for(const product of chamada.getProductsList())
+                {
+                    if(product.name.toLowerCase().includes(name.toLowerCase()) || product.code.includes(name))
+                    {
+                        console.log(`Found product ${product.name}`)
+                        json.push(chamada.toJSON());
+                        break;
+                    }
+                }
+            }
+        
+            res.json(json);
+        });
+    }
+
+    private processPricesTable(filePath: string, options: ProcessPricesTableOptions)
+    {
+        const workSheetsFromFile = xlsx.parse(filePath);
+
+        const tableIds: {[key: string]: number} = {
+          'A': 0,
+          'B': 1,
+          'C': 2,
+          'D': 3,
+          'E': 4,
+          'F': 5
+        };
+
+        const nameTableId = tableIds[options.description];
+        const codeTableId = tableIds[options.code];
+        const priceTableId = tableIds[options.price];
+
+        const products: ProductJSON_Changed[] = [];
+        
+        const data = workSheetsFromFile[0].data;
+        for(const a of data)
+        {
+            if(a.length == 0) continue;
+
+            const name = a[nameTableId];
+            const code = a[codeTableId];
+            const price = parseFloat(parseFloat(a[priceTableId]).toFixed(2));
+
+            // ignore first row
+            if(a[0].toLowerCase().includes("descrição")) continue;
+            if(a[0].toLowerCase().includes("descricao")) continue;
+
+            const latestProduct = this.getMostRecentProduct(code);
+
+            for(const chamada of this.chamadas.values())
+            {
+                const product = chamada.getProductByCode(code);
+
+                if(product == undefined) continue;
+
+                const oldPrice = product.price;
+        
+                const diff = Math.abs(oldPrice - price);
+         
+                const changedPrice = diff >= options.minPriceChange;
+
+                if(changedPrice)
+                {
+                    console.log(`Product: ${code}`);
+                    console.log(`Old price:`, oldPrice);
+                    console.log(`New price:`, price);
+                    console.log(`Diff: ${diff} >= ${options.minPriceChange}`);
+                }
+
+                const chamadaJson: ChamadaPageJSON = {
+                    chamada: chamada.toJSON(),
+                    theme: this.getThemeById(chamada.theme)!.data
+                };
+
+                products.push({
+                    product: product.toJSON(),
+                    chamadaData: chamadaJson,
+                    newPrice: price,
+                    newProduct: false,
+                    changedPrice: changedPrice,
+                    isMostRecent: product.price == latestProduct?.price
+                });
+
+                if(changedPrice)
+                {
+                    console.log(`Price changed!`);
+                }
+            }
+        }
+
+        return products;
     }
 
     public authorizeKey(key: string)
@@ -746,33 +917,6 @@ export class Vilubri extends App
 
             return theme;
         }
-    }
-
-    public findLatestProduct(code: string)
-    {
-        let allChamadas = Array.from(this.chamadas.values());
-
-        allChamadas = allChamadas.sort((a, b) => {
-            return a.date.getTime() - b.date.getTime()
-        });
-
-        //console.log("--")
-
-        let latestProduct: Product | undefined = undefined;
-
-        // for(const chamada of allChamadas)
-        // {
-        //     for(const product of chamada.products)
-        //     {
-        //         if(product.code != code) continue;
-
-        //         latestProduct = product;
-        //     }
-        // }
-
-        // //console.log(latestProduct);
-
-        return latestProduct;
     }
 }
 

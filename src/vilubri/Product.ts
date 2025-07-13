@@ -15,6 +15,7 @@ export interface ProductJSON_Changed {
     newPrice: number;
     newProduct: boolean;
     changedPrice: boolean;
+    isMostRecent: boolean;
 }
 
 export class Product {

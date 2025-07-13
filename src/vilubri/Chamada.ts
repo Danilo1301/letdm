@@ -173,11 +173,32 @@ export class Chamada {
 
     public hasProductCode(code: string)
     {
-        // for(const product of this.products)
-        // {
-        //     if(product.code == code) return true;
-        // }
+        for(const table of this.productTables)
+        {
+            for(const product of table)
+            {
+                if(product.code == code)
+                {
+                    return true;
+                }
+            }
+        }
         return false;
+    }
+
+    public getProductByCode(code: string)
+    {
+        for(const table of this.productTables)
+        {
+            for(const product of table)
+            {
+                if(product.code == code)
+                {
+                    return product;
+                }
+            }
+        }
+        return undefined;
     }
 
     public getProductsList()

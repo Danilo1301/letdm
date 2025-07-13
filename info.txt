@@ -1,6 +1,0 @@
-[ ] Re-enable Discord/steam bot etc
-
-
-Todo - Vilubri
-(19/03/25) [ ] Adicionar botão para atualizar o .date (e mudar para modified date)
-(19/03/25) [ ] Botão para mudar o tema/cor
