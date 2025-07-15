@@ -615,10 +615,29 @@ export class Vilubri extends App
 
         app.post('/api/vilubri/uploadTable', this.upload.single('file'), (req, res) => {
             //const id = req.params.id;
-        
+            
             const file = (req as any).file;
         
             console.log(file);
+
+            const test = false;
+            if(test)
+            {
+                const options: ProcessPricesTableOptions = {
+                    description: req.body["description-id"],
+                    code: req.body["code-id"],
+                    price: req.body["price-id"],
+                    minPriceChange: parseFloat(req.body["min-price-change"]) || 0
+                }
+
+                const testPath = path.join(PATH_DATA, "vilubri", "Vilubri.xlsx");
+
+                const changedProducts = this.processPricesTable(testPath, options);
+
+                res.json(changedProducts);
+
+                return;
+            }
 
             if(file == undefined)
             {
@@ -626,10 +645,10 @@ export class Vilubri extends App
                 return;
             }
 
-            const path = file.path;
+            const filePath = file.path;
             const newPath = `${PATH_UPLOADS}/table.xlsx`;
             
-            fs.renameSync(path, newPath);
+            fs.renameSync(filePath, newPath);
 
             const options: ProcessPricesTableOptions = {
                 description: req.body["description-id"],
@@ -675,6 +694,41 @@ export class Vilubri extends App
             }
         
             res.json(json);
+        });
+
+        app.post('/api/vilubri/updateChamada', (req, res) => {
+            console.log("update chamada")
+
+            const id: string = req.body.chamada;
+            const key: string = req.body.key;
+            const products: TableProductJSON[] = req.body.products;
+        
+            if(!this.authorizeKey(key))
+            {
+                res.status(500).send({ error: "Wrong authentication key" });
+                return;
+            }
+
+            const chamada = VilubriData.Chamadas.get(id);
+        
+            if(!chamada)
+            {
+                res.status(500).send({ error: "Could not find chamada " + id });
+                return;
+            }
+
+            for(const tableProduct of products)
+            {
+                var product = chamada.getProductByCode(tableProduct.product.productDefinition.code);
+
+                product!.price = tableProduct.newPrice;
+            }
+
+            chamada.date = new Date();
+
+            this.saveChamadas();
+            
+            res.json(chamada.id);
         });
     }
 

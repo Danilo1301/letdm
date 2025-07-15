@@ -2,12 +2,15 @@ import React, { useContext, useState } from 'react';
 import { Product, ProductWEB, TableProductJSON } from '../../../../src/vilubri/Product';
 import { ChamadaJSON, ChamadaWEB } from '../../../../src/vilubri/Chamada';
 import { useUser } from '../../components/User';
+import { getLetDM_Key } from '../../../components/cookies';
 
 interface ChangedDetails
 {
     chamada: ChamadaWEB
     products: TableProductJSON[]
 }
+
+let globalProducts: TableProductJSON[] = [];
 
 function CompareTable()
 {
@@ -46,6 +49,7 @@ function CompareTable()
                 {
                     console.log(data);
 
+                    globalProducts = data;
                     setProducts(data);
                     processChangedProducts(data);
                     return;
@@ -171,28 +175,94 @@ const TableProduct: React.FC<TableProductProps> = ({ tableProduct }) => {
         }
     }
 
+    const [optionsVisible, setOptionsVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const handleClick = () => {
+        setOptionsVisible(!optionsVisible);
+    }
+
+    const handleUpdateChamada = () => {
+
+        if(!chamada) return;
+
+        const products: TableProductJSON[] = [];
+
+        for(const tableProduct of globalProducts)
+        {
+            if(!tableProduct.chamada) continue;
+
+            if(tableProduct.chamada.id != chamada.id) continue;
+
+            products.push(tableProduct);
+        }
+
+        console.log(products);
+
+        //
+
+        setLoading(true);
+
+        const data = {
+            key: getLetDM_Key(),
+            products: products,
+            chamada: chamada.id
+        };
+
+        fetch("/api/vilubri/updateChamada", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                // força o erro para ir pro catch
+                return response.json().then(err => { throw err; });
+            }
+        return response.json();
+        })
+        .then(result => {
+            console.log("Sucesso", result);
+
+            location.href = "/vilubri/chamadas/" + chamada.id;
+        })
+        .catch(err => {
+            alert("Erro: " + err.error);
+
+            setLoading(false);
+        });
+    }
 
     return (
-        <div className="d-flex justify-content-between align-items-center border-bottom py-2">
-            <div className="d-flex align-items-center gap-2">
-                <div
-                    className="rounded small me-2"
-                    style={{
-                        padding: "0px",
-                        width: "60px",
-                        height: "30px",
-                        backgroundColor: colorHex,
-                        border: '5px solid ' + colorHex,
-                        color: 'black'
-                    }}
-                >{chamada?.id || "nenhum"}</div>
-                <span className="small">{code}</span>
-                <span className="fw-medium">{name}</span>
+        <>
+            <div className="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div className="d-flex align-items-center gap-2">
+                    <div
+                        onClick={handleClick}
+                        className="rounded small me-2"
+                        style={{
+                            padding: "0px",
+                            width: "60px",
+                            height: "30px",
+                            backgroundColor: colorHex,
+                            border: '5px solid ' + colorHex,
+                            color: 'black',
+                            cursor: 'pointer'
+                        }}
+                    >{chamada?.id || "nenhum"}</div>
+                    <span className="small">{code}</span>
+                    <span className="fw-medium">{name}</span>
+                </div>
+                <div className="fw-semibold text-end" style={{color: priceColor}}>
+                    R$ {newPrice} <span className="small">({priceDiff.toFixed(2)})</span>
+                </div>
             </div>
-            <div className="fw-semibold text-end" style={{color: priceColor}}>
-                R$ {newPrice} <span className="small">({priceDiff.toFixed(2)})</span>
+            <div style={{display: optionsVisible ? "block" : "none"}}>
+                <button disabled={loading} onClick={handleUpdateChamada}>Atualizar chamada {chamada?.id}</button>
             </div>
-        </div>
+        </>
     );
 };
 

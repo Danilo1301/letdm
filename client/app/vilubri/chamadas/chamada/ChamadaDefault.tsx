@@ -126,6 +126,15 @@ const ChamadaDefault: React.FC<ChamadaDefaultProps> = ({ chamada }) =>
                         {getProducts().map((product, i) => <ProductItem key={i} product={product}></ProductItem>)}
                     </div>
 
+                    <div className="container">
+                        <div className="row gx-0 gap-4">
+                            {getProducts().map((product, i) => (
+                            <div key={i} className="col-auto" style={{width: "450px"}}> {/* 2 por linha, fixo */}
+                                <ProductElement product={product} />
+                            </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 <button type="button" className="btn btn-danger mt-4" onClick={() => deleteChamada(id)}>Deletar chamada</button>
@@ -263,5 +272,52 @@ function ProductItem({product}: { product: ProductWEB })
         
     );
 }
+
+const ProductElement = ({product}: { product: ProductWEB }) =>
+{
+    const themeContext = useContext(ThemeContext);
+    const { theme, setTheme } = themeContext;
+
+    //image
+    const productImage = `/api/vilubri/productimage/${product.productDefinition.code}.png`;
+
+    //lines description
+    let lines: string[] = product.productDefinition.description.split("\n");
+    lines = lines.map(line => {
+        line = line.trim();
+        if(line.length === 0) return "⠀";
+        return line;
+    })
+
+    return (
+        <div className="col">
+            <div className="col">
+                <div className="item-bg p-3" style={{ backgroundColor: theme.itemColor }}>
+                <div className="item-title">
+                    {product.productDefinition.code} - {product.productDefinition.name}
+                </div>
+                <div className="row">
+                    <div className="col-auto">
+                    <img
+                        className="item-image border"
+                        src={productImage}
+                        alt={product.productDefinition.name}
+                    />
+                    <div className="item-price">
+                        {Product.formatPriceWithIPI(product.price, product.productDefinition.hasIPI)}
+                    </div>
+                    </div>
+                    <div className="item-description col p-0">
+                    {lines.map((line, i) => (
+                        <div key={i}>{line}</div>
+                    ))}
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 export default ChamadaDefault;

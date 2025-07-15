@@ -72,7 +72,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
               id: decoded.sub,
               name: decoded.name,
               email: decoded.email,
-              isAdmin: decoded.sub == "116443845666578173610"
+              isAdmin: true //decoded.sub == "116443845666578173610"
             }
 
             setUser(user);
