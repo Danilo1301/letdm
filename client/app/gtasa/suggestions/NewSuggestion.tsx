@@ -1,14 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { defaultSuggestionInfo, EditSuggestionModel, SuggestionInfo, SuggestionInfoContext } from './editSuggestion/EditSuggestionModel';
 import { NewSugestion_PostBody } from '../../../../src/interfaces';
-import { UserInfoContext } from '../../components/UserInfo';
+
 import { getLetDM_Key } from '../../../components/cookies';
+import { useUser } from '../../components/User';
 
 const NewSuggestion: React.FC = () => {
 
     const [suggestionInfo, setSuggestionInfo] = useState<SuggestionInfo>(defaultSuggestionInfo);
 
-    const { userInfo } = useContext(UserInfoContext);
+    const { user } = useUser();
+    
+    const isAdmin = user?.isAdmin == true;
 
     const updateSuggestionInfo = (info: Partial<SuggestionInfo>) => {
         setSuggestionInfo((prevInfo) => {
@@ -18,8 +21,12 @@ const NewSuggestion: React.FC = () => {
 
     const sendSuggestion = () => {
         console.log("send")
-    
-        console.log(userInfo)
+
+        if(!user)
+        {
+            alert("user not found");
+            return;
+        }
 
         const body: NewSugestion_PostBody = {
             suggestion: {
@@ -31,7 +38,7 @@ const NewSuggestion: React.FC = () => {
                 priorityTags: suggestionInfo.priorityTags,
                 dateAdded: suggestionInfo.dateAdded
             },
-            sub: userInfo.sub,
+            sub: user.id,
             key: getLetDM_Key()
         }
 

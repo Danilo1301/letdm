@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ListItemGroup } from '../../components/list/ListItemGroup';
 import { ListItem } from '../../components/list/ListItem';
-import { UserInfoContext } from '../../components/UserInfo';
 import { Suggestion, suggestionPriorityTags, suggestionTags } from '../../../../src/suggestions/suggestion';
+import { useUser } from '../../components/User';
 
 export interface TagsContextType {
     tags: string[];
@@ -61,7 +61,9 @@ interface SuggestionElementProps {
 
 const SuggestionElement: React.FC<SuggestionElementProps> = ({suggestion}) => {
 
-    const { userInfo } = useContext(UserInfoContext);
+    const { user } = useUser();
+        
+    const isAdmin = user?.isAdmin == true;
 
     const id = suggestion.id;
 
@@ -71,7 +73,7 @@ const SuggestionElement: React.FC<SuggestionElementProps> = ({suggestion}) => {
 
     let editBtnEl = <></>;
 
-    if(userInfo.isAdmin)
+    if(isAdmin)
     {
         editBtnEl = <button onClick={edit}>Editar</button>;
     }
@@ -117,7 +119,8 @@ const SuggestionElement: React.FC<SuggestionElementProps> = ({suggestion}) => {
 
 const Suggestions: React.FC = () => {
 
-    const { userInfo } = useContext(UserInfoContext);
+    const { user } = useUser();
+    const isAdmin = user?.isAdmin == true;
 
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 

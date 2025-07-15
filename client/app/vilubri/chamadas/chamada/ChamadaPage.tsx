@@ -1,5 +1,5 @@
 import React, { useState, createContext, useContext } from 'react';
-import { ChamadaJSON, ChamadaPageJSON, ChamadaType } from '../../../../../src/vilubri/Chamada';
+import { ChamadaJSON, ChamadaType, ChamadaWEB } from '../../../../../src/vilubri/Chamada';
 import { useParams } from 'react-router-dom';
 import ChamadaTable from './ChamadaTable';
 import { getLetDM_Key } from '../../../../components/cookies';
@@ -9,11 +9,11 @@ import { Theme, ThemeJSON } from '../../../../../src/vilubri/Theme';
 import { showConfirmWindow } from '../../Vilubri';
 
 const getChamada = async (id: string) => {
-    return new Promise<ChamadaPageJSON>((resolve, reject) =>
+    return new Promise<ChamadaWEB>((resolve, reject) =>
     {
         fetch("/api/vilubri/chamadas/" + id, {method: 'GET'})
         .then(response => response.json())
-        .then((chamada: ChamadaPageJSON) => {
+        .then((chamada: ChamadaWEB) => {
             resolve(chamada)
         })
         .catch((err) => {
@@ -27,7 +27,7 @@ function ChamadaPage()
     const params = useParams();
     const id = params.id!;
     
-    const [chamada, setChamada] = useState<ChamadaJSON>();
+    const [chamada, setChamada] = useState<ChamadaWEB>();
 
     const [theme, setTheme] = useState<ThemeJSON>(defaultTheme);
         
@@ -41,8 +41,8 @@ function ChamadaPage()
         getChamada(id).then(data => {
             console.log(data);
 
-            setChamada(data.chamada);
-            setTheme(data.theme);
+            setChamada(data);
+            setTheme(data.themeData);
         })
     }, [id])
 

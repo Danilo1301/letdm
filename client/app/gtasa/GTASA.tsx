@@ -34,7 +34,7 @@ function GTASA() {
                     <HomeItem
                         title={'Pattern helper'}
                         description={'Pattern helper for GTA SA mod called GiroflexVSL'}
-                        image={'assets\\projectThumbs\\gtasa_mods_pc.png'}
+                        image={'assets\\projectThumbs\\projects.png'}
                         href='/gtasa/patterns'
                     ></HomeItem>
                 </div>

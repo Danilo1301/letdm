@@ -9,7 +9,6 @@ import Mods from './gtasa/mods/Mods';
 import ModsAndroid from './gtasa/mods/ModsAndroid';
 import ModsPC from './gtasa/mods/ModsPC';
 import Suggestions from './gtasa/suggestions/Suggestions';
-import { defaultUserInfo, UserInfo, UserInfoContext } from './components/UserInfo';
 import { getCookie } from '../components/cookies';
 import { cookieName_access_token } from '..';
 
@@ -30,14 +29,6 @@ import Account from './account/Account';
 import GtasaRoutes from './gtasa/GtasaRoutes';
 
 const App: React.FC = () => {
-    const [userInfo, setUserInfo] = useState<UserInfo>(defaultUserInfo);
-
-    const updateUserInfo = (newUserInfo: Partial<UserInfo>) => {
-        setUserInfo((prevUserInfo) => {
-            return { ...prevUserInfo, ...newUserInfo };
-        });
-    };
-
     return (
         <>
             <UserProvider>

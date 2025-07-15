@@ -1,5 +1,5 @@
 import React, { useState, createContext, useContext } from 'react';
-import { Chamada, ChamadaJSON, ChamadaPageJSON } from '../../../../../src/vilubri/Chamada';
+import { Chamada, ChamadaJSON, ChamadaWEB } from '../../../../../src/vilubri/Chamada';
 import { useParams } from 'react-router-dom';
 import { defaultSuggestionInfo } from '../../../gtasa/suggestions/editSuggestion/EditSuggestionModel';
 import { getLetDM_Key } from '../../../../components/cookies';
@@ -7,7 +7,7 @@ import { changeDate, changeTheme, deleteChamada, setChamadaCustomDate, toggleCom
 import { ThemeContext } from './ColorSettings';
 
 type ChamadaTableProps = {
-  chamada: ChamadaJSON; // Substitua com o tipo correto
+  chamada: ChamadaWEB; // Substitua com o tipo correto
 };
 
 export type Dado = {
@@ -124,7 +124,7 @@ const ChamadaTable: React.FC<ChamadaTableProps> = ({ chamada }) =>
             for (let i = 0; i < table.length; i++) {
                 const product = table[i];
                 const preco = `R$ ${product.price.toFixed(2).replace('.', ',')}`;
-                const linha = `${product.name}\t${product.code}\t${preco}${product.hasIPI ? ' + IPI' : ''}`;
+                const linha = `${product.productDefinition.name}\t${product.productDefinition.code}\t${preco}${product.productDefinition.hasIPI ? ' + IPI' : ''}`;
                 str += linha + '\n';
             }
 

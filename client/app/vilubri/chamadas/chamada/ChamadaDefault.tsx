@@ -1,16 +1,16 @@
 import React, { useState, createContext, useContext } from 'react';
-import { Chamada, ChamadaJSON, ChamadaPageJSON } from '../../../../../src/vilubri/Chamada';
+import { Chamada, ChamadaJSON, ChamadaWEB } from '../../../../../src/vilubri/Chamada';
 import { useParams } from 'react-router-dom';
 import { defaultSuggestionInfo } from '../../../gtasa/suggestions/editSuggestion/EditSuggestionModel';
 import { getLetDM_Key } from '../../../../components/cookies';
 import { changeDate, changeTheme, deleteChamada, toggleCompleteStatus } from './ChamadaPage';
 import { defaultTheme, ThemeContext } from './ColorSettings';
 import { Theme, ThemeJSON } from '../../../../../src/vilubri/Theme';
-import { Product, ProductJSON } from '../../../../../src/vilubri/Product';
+import { Product, ProductJSON, ProductWEB } from '../../../../../src/vilubri/Product';
 import { showConfirmWindow } from '../../Vilubri';
 
 type ChamadaDefaultProps = {
-  chamada: ChamadaJSON; // Substitua com o tipo correto
+  chamada: ChamadaWEB; // Substitua com o tipo correto
 };
 
 let THIS_CHAMADA_ID: string = "";
@@ -95,7 +95,7 @@ const ChamadaDefault: React.FC<ChamadaDefaultProps> = ({ chamada }) =>
                 <a className='btn btn-secondary mt-4 mb-4' style={{marginLeft: "10px"}} onClick={() => changeTheme(id)}>Mudar tema</a>
                 <a className='btn btn-secondary mt-4 mb-4' style={{marginLeft: "10px"}} onClick={() => changeDate(id)}>Mudar data de modificação</a>
 
-                <div className='p-5' style={{backgroundColor: theme.backgroundColor}}>
+                <div className='p-5 text-dark' style={{backgroundColor: theme.backgroundColor}}>
                     <div className=''>
                         <div className="nav row" style={{backgroundColor: theme.navColor}}>
                             <div className='col'>
@@ -122,7 +122,7 @@ const ChamadaDefault: React.FC<ChamadaDefaultProps> = ({ chamada }) =>
                     </div>
                 
 
-                    <div className="" style={{backgroundColor: theme.backgroundColor}}>
+                    <div className="text-dark" style={{backgroundColor: theme.backgroundColor}}>
                         {getProducts().map((product, i) => <ProductItem key={i} product={product}></ProductItem>)}
                     </div>
 
@@ -134,7 +134,7 @@ const ChamadaDefault: React.FC<ChamadaDefaultProps> = ({ chamada }) =>
     );
 }
 
-function ProductItem({product}: { product: ProductJSON })
+function ProductItem({product}: { product: ProductWEB })
 {
     const themeContext = useContext(ThemeContext);
     const { theme, setTheme } = themeContext;
@@ -209,7 +209,7 @@ function ProductItem({product}: { product: ProductJSON })
     }
 
     //lines description
-    let lines: string[] = product.description.split("\n");
+    let lines: string[] = product.productDefinition.description.split("\n");
     lines = lines.map(line => {
         line = line.trim();
         if(line.length === 0) return "⠀";
@@ -217,7 +217,7 @@ function ProductItem({product}: { product: ProductJSON })
     })
 
     //image
-    const productImage = `/api/vilubri/productimage/${product.code}.png`;
+    const productImage = `/api/vilubri/productimage/${product.productDefinition.code}.png`;
 
     //style
     //const useSmallProduct = useContext(CheckboxContext);
@@ -234,11 +234,11 @@ function ProductItem({product}: { product: ProductJSON })
             <div className="col">
                 <div className="col">
                     <div className="item-bg p-3" style={{backgroundColor: theme.itemColor}}>
-                        <div className="item-title">{product.code} - {product.name}</div>
+                        <div className="item-title">{product.productDefinition.code} - {product.productDefinition.name}</div>
                         <div className="row">
                             <div className="col-auto">
-                                <img className="item-image border" src={productImage} alt={product.name}/>
-                                <div className="item-price">{Product.formatPriceWithIPI(product.price, product.hasIPI)}</div>
+                                <img className="item-image border" src={productImage} alt={product.productDefinition.name}/>
+                                <div className="item-price">{Product.formatPriceWithIPI(product.price, product.productDefinition.hasIPI)}</div>
                             </div>
                             <div className="item-description col p-0">
                                 {lines.map((line, i) => <div key={i}>{line}</div>)}

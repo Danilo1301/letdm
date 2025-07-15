@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Product, ProductJSON } from '../../../../../../src/vilubri/Product';
+import { Product, ProductWEB } from '../../../../../../src/vilubri/Product';
 import { showConfirmWindow } from '../../../Vilubri';
 import { getLetDM_Key } from '../../../../../components/cookies';
 
@@ -20,14 +20,14 @@ function EditProduct() {
     React.useEffect(() => {
         fetch(`/api/vilubri/chamadas/${id}/products/${productIndex}`)
         .then(response => response.json())
-        .then((data: ProductJSON) => {
+        .then((data: ProductWEB) => {
             console.log(data)
 
-            setCode(data.code);
-            setName(data.name);
-            setDescription(data.description);
-            setPrice(Product.formatPriceWithIPI(data.price, data.hasIPI));
-            setHasIPI(data.hasIPI);
+            setCode(data.productDefinition.code);
+            setName(data.productDefinition.name);
+            setDescription(data.productDefinition.description);
+            setPrice(Product.formatPriceWithIPI(data.price, data.productDefinition.hasIPI));
+            setHasIPI(data.productDefinition.hasIPI);
         })
     }, [])
 

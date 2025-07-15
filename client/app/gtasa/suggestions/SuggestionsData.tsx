@@ -1,10 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import { defaultSuggestionInfo, EditSuggestionModel, SuggestionInfo, SuggestionInfoContext } from './editSuggestion/EditSuggestionModel';
-import { useParams } from 'react-router-dom';
-import { UserInfoContext } from '../../components/UserInfo';
-import { NewSugestion_PostBody } from '../../../../src/interfaces';
-import { Suggestion } from '../../../../src/suggestions/suggestion';
 import { getLetDM_Key } from '../../../components/cookies';
 
 const SuggestionsData: React.FC = () => {

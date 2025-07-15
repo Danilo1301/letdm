@@ -99,7 +99,7 @@ const PatternsPage: React.FC = () => {
         return () => clearInterval(intervalRef.current); // limpar no unmount
     }, []);
 
-    const firstStep = pattern.steps[0];
+    //const firstStep = pattern.steps[0];
     //const numOfLeds = firstStep?.values.length ?? 0;
 
     const leds: React.JSX.Element[] = [];

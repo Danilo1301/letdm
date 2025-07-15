@@ -55,7 +55,7 @@ function NewDefault() {
 
     return (
         <div className='container'>
-            <a href="/chamadas">Voltar</a>
+            <a href="/vilubri/chamadas">Voltar</a>
 
             <div className=''>
                 <span>ID:</span>

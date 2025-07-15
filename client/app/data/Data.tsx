@@ -1,12 +1,14 @@
 import React, { useContext, useState } from 'react';
 import axios from 'axios';
 import { getLetDM_Key } from '../../components/cookies';
-import { UserInfoContext } from '../components/UserInfo';
+import { useUser } from '../components/User';
 
 function Data() {
 
-    const { userInfo } = useContext(UserInfoContext);
+    const { user } = useUser();
 
+    const isAdmin = user?.isAdmin == true;
+    
     const [file, setFile] = React.useState<any>()
 
     const key = getLetDM_Key();
@@ -41,7 +43,7 @@ function Data() {
         });
     }
 
-    if(!userInfo.isAdmin)
+    if(!isAdmin)
     {
         return <>Você precisa ser um admin do site</>
     }

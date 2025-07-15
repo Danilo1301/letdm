@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { defaultSuggestionInfo, EditSuggestionModel, SuggestionInfo, SuggestionInfoContext } from './editSuggestion/EditSuggestionModel';
 import { useParams } from 'react-router-dom';
-import { UserInfoContext } from '../../components/UserInfo';
 import { Key_PostBody, NewSugestion_PostBody } from '../../../../src/interfaces';
 import { Suggestion } from '../../../../src/suggestions/suggestion';
 import { getLetDM_Key } from '../../../components/cookies';
+import { useUser } from '../../components/User';
 
 const EditSuggestion: React.FC = () => {
 
@@ -19,10 +19,18 @@ const EditSuggestion: React.FC = () => {
         });
     };
 
-    const { userInfo } = useContext(UserInfoContext);
+    const { user } = useUser();
+        
+    const isAdmin = user?.isAdmin == true;
     
     const editSuggestion = () => {
         console.log("edit")
+
+        if(!user)
+        {
+            alert("user not defined");
+            return;
+        }
     
         const body: NewSugestion_PostBody = {
             suggestion: {
@@ -34,7 +42,7 @@ const EditSuggestion: React.FC = () => {
                 priorityTags: suggestionInfo.priorityTags,
                 dateAdded: new Date().getTime()
             },
-            sub: userInfo.sub,
+            sub: user.id,
             key: getLetDM_Key()
         }
 

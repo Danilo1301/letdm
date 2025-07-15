@@ -1,5 +1,6 @@
-import { Product, ProductJSON } from "./Product";
+import { Product, ProductJSON, ProductWEB } from "./Product";
 import { ThemeJSON } from "./Theme";
+import { VilubriData } from "./vilubriData";
 
 export interface ChamadaJSON {
     id: string;
@@ -11,18 +12,15 @@ export interface ChamadaJSON {
     theme: string;
 }
 
-export interface OldChamadaJSON {
+export interface ChamadaWEB {
     id: string;
-    products: ProductJSON[];
+    type: ChamadaType,
+    productTables: ProductWEB[][];
     date: number;
     createdDate: number;
     completed: boolean;
     theme: string;
-}
-
-export interface ChamadaPageJSON {
-    chamada: ChamadaJSON
-    theme: ThemeJSON;
+    themeData: ThemeJSON;
 }
 
 export enum ChamadaType {
@@ -75,17 +73,43 @@ export class Chamada {
             theme: this.theme
         }
 
-        
-
         return json;
+    }
+
+    public toWEB()
+    {
+        const productTables: ProductWEB[][] = [];
+
+        for (let tableIndex = 0; tableIndex < this.productTables.length; tableIndex++) {
+            const table = this.productTables[tableIndex];
+
+            const tableJson: ProductWEB[] = [];
+
+            for (let i = 0; i < table.length; i++) {
+                const product = table[i];
+                const productJson = product.toWEB(); // assume que o produto tem um método toJSON()
+                tableJson.push(productJson);
+            }
+
+            productTables.push(tableJson);
+        }
+
+        const web: ChamadaWEB = {
+            id: this.id,
+            type: this.type,
+            productTables: productTables,
+            date: this.date.getTime(),
+            createdDate: this.createdDate.getTime(),
+            completed: this.isCompleted,
+            theme: this.theme,
+            themeData: VilubriData.getThemeById(this.theme)!.data
+        }
+
+        return web;
     }
 
     public loadFromJSON(data: ChamadaJSON)
     {
-        if (data.theme === undefined) {
-            data.theme = this.theme;
-        }
-
         this.date = new Date(data.date);
         this.createdDate = new Date(data.createdDate);
         this.isCompleted = data.completed;
@@ -106,13 +130,9 @@ export class Chamada {
                     hasIPI = result[1];
                 }
 
-                const product = new Product(
-                    productJson.name,
-                    productJson.code,
-                    productJson.description,
-                    price,
-                    hasIPI
-                );
+                const productDefinition = VilubriData.getProductDefinitionByCode(productJson.productCode);
+
+                const product = new Product(productDefinition, price);
 
                 product.chamada = this;
 
@@ -122,9 +142,9 @@ export class Chamada {
             this.productTables.push(productList);
         }
 
-        if (data.createdDate === 0) {
-            this.createdDate = new Date();
-        }
+        // if (data.createdDate === 0) {
+        //     this.createdDate = new Date();
+        // }
     }
 
     public addProduct(product: Product)
@@ -143,13 +163,10 @@ export class Chamada {
 
         for(const p of this.productTables[tableIndex])
         {
-            if(p.code == product.code)
+            if(p.productDefinition.code == product.productDefinition.code)
             {
-                p.name = product.name;
-                p.price = product.price;
-                p.hasIPI = product.hasIPI;
-
-                return;
+                console.warn("Já existe um produto aqui?");
+                //return;
             }
         }
 
@@ -164,7 +181,7 @@ export class Chamada {
             for (let i = 0; i < table.length; i++) {
                 const p = table[i];
 
-                if(p.code == product.code) return i;
+                if(p.productDefinition.code == product.productDefinition.code) return i;
             }
 
         }
@@ -177,7 +194,7 @@ export class Chamada {
         {
             for(const product of table)
             {
-                if(product.code == code)
+                if(product.productDefinition.code == code)
                 {
                     return true;
                 }
@@ -192,7 +209,7 @@ export class Chamada {
         {
             for(const product of table)
             {
-                if(product.code == code)
+                if(product.productDefinition.code == code)
                 {
                     return product;
                 }

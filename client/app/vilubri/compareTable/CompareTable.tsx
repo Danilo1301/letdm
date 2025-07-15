@@ -1,26 +1,28 @@
 import React, { useContext, useState } from 'react';
-import { UserInfoContext } from '../../components/UserInfo';
-import { Product, ProductJSON_Changed } from '../../../../src/vilubri/Product';
-import { ChamadaJSON, ChamadaPageJSON } from '../../../../src/vilubri/Chamada';
+import { Product, ProductWEB, TableProductJSON } from '../../../../src/vilubri/Product';
+import { ChamadaJSON, ChamadaWEB } from '../../../../src/vilubri/Chamada';
+import { useUser } from '../../components/User';
 
 interface ChangedDetails
 {
-    chamadaData: ChamadaPageJSON
-    products: ProductJSON_Changed[]
+    chamada: ChamadaWEB
+    products: TableProductJSON[]
 }
 
 function CompareTable()
 {
-    const { userInfo } = useContext(UserInfoContext);
+    const { user } = useUser();
+    
+    const isAdmin = user?.isAdmin == true;
 
     const [descriptionId, setDescriptionId] = useState("A");
     const [codeId, setCodeId] = useState("B");
     const [priceId, setPriceId] = useState("F");
     const [minPrice, setMinPrice] = useState("1.99");
 
-    const [products, setProducts] = useState<ProductJSON_Changed[]>([]);
+    const [products, setProducts] = useState<TableProductJSON[]>([]);
 
-    const [changes, setChanges] = useState<ChangedDetails[]>([]);
+    //const [changes, setChanges] = useState<ChangedDetails[]>([]);
 
     const handleSubmit = (event: any) => {
         const button = document.getElementById("submit-table-button") as HTMLButtonElement;
@@ -39,14 +41,16 @@ function CompareTable()
         
         fetch(url, fetchOptions)
         .then(response => {
-            response.json().then((data) => {
+            response.json().then((data: TableProductJSON[]) => {
                 if(response.ok)
                 {
+                    console.log(data);
+
                     setProducts(data);
                     processChangedProducts(data);
                     return;
                 }
-                alert(data.error);
+                alert((data as any).error);
 
                 button.disabled = false;
             })
@@ -55,129 +59,141 @@ function CompareTable()
         event.preventDefault();
     }
 
-    const processChangedProducts = (products: ProductJSON_Changed[]) =>{
+    const processChangedProducts = (products: TableProductJSON[]) =>{
 
         const results: ChangedDetails[] = [];
 
         const changedChamadas: string[] = [];
 
-        for(const product of products)
-        {
-            if(product.chamadaData == undefined) continue;
+        // for(const product of products)
+        // {
+        //     if(product.chamadaData == undefined) continue;
 
-            if(!changedChamadas.includes(product.chamadaData.chamada.id))
-            {
-                changedChamadas.push(product.chamadaData.chamada.id);
+        //     if(!changedChamadas.includes(product.chamadaData.chamada.id))
+        //     {
+        //         changedChamadas.push(product.chamadaData.chamada.id);
 
-                results.push({
-                    chamadaData: product.chamadaData,
-                    products: []
-                });
-            }
+        //         results.push({
+        //             chamadaData: product.chamadaData,
+        //             products: []
+        //         });
+        //     }
 
-            if(product.changedPrice)
-            {
-                for(const result of results)
-                {
-                    if(result.chamadaData.chamada.id != product.chamadaData.chamada.id) continue;
+        //     if(product.changedPrice)
+        //     {
+        //         for(const result of results)
+        //         {
+        //             if(result.chamadaData.chamada.id != product.chamadaData.chamada.id) continue;
 
-                    result.products.push(product);
+        //             result.products.push(product);
 
-                    break;
-                }
+        //             break;
+        //         }
 
-            }
-        }
+        //     }
+        // }
 
-        console.log(results);
+        // console.log(results);
 
-        setChanges(results);
+        // setChanges(results);
     }
 
-    if(!userInfo.isAdmin) return <>Você precisa ser um admin do site</>;
+    if(!isAdmin) return <>Você precisa ser um admin do site</>;
 
     return (
         <>
             <a href="/vilubri/">Voltar</a>
 
-            <form action="/api/vilubri/uploadTable" method="post" onSubmit={handleSubmit} className='mb-3'>
-                <span>Selecione a tabela de preços (.xlsx):</span>
-                <br></br>
-                <input type="file" name="file" />
-                <br></br>
-                <div>
-                    <span>Descrição:</span>
-                    <input type="text" name="description-id" value={descriptionId} onChange={(event) => { setDescriptionId(event.target.value); }}></input>
-                </div>
-                <div>
-                    <span>Código:</span>
-                    <input type="text" name="code-id" value={codeId} onChange={(event) => { setCodeId(event.target.value); }}></input>
-                </div>
-                <div>
-                    <span>Preço:</span>
-                    <input type="text" name="price-id" value={priceId} onChange={(event) => { setPriceId(event.target.value); }}></input>
-                </div>
-                <div>
-                    <span>Preço mínimo de alteração:</span>
-                    <input type="number" name="min-price-change" value={minPrice} onChange={(event) => { setMinPrice(event.target.value); }}></input>
-                </div>
-                <br></br>
-                <button id="submit-table-button" type="submit">Enviar</button>
-            </form>
+            <div className='container'>
+                <form action="/api/vilubri/uploadTable" method="post" onSubmit={handleSubmit} className='mb-3'>
+                    <span>Selecione a tabela de preços (.xlsx):</span>
+                    <br></br>
+                    <input type="file" name="file" />
+                    <br></br>
+                    <div>
+                        <span>Descrição:</span>
+                        <input type="text" name="description-id" value={descriptionId} onChange={(event) => { setDescriptionId(event.target.value); }}></input>
+                    </div>
+                    <div>
+                        <span>Código:</span>
+                        <input type="text" name="code-id" value={codeId} onChange={(event) => { setCodeId(event.target.value); }}></input>
+                    </div>
+                    <div>
+                        <span>Preço:</span>
+                        <input type="text" name="price-id" value={priceId} onChange={(event) => { setPriceId(event.target.value); }}></input>
+                    </div>
+                    <div>
+                        <span>Preço mínimo de alteração:</span>
+                        <input type="number" name="min-price-change" value={minPrice} onChange={(event) => { setMinPrice(event.target.value); }}></input>
+                    </div>
+                    <br></br>
+                    <button id="submit-table-button" type="submit">Enviar</button>
+                </form>
 
-            <DisplayChangedChamadas changes={changes}></DisplayChangedChamadas>
+                <DisplayTable products={products}></DisplayTable>
+            </div>
         </>
     );
 }
 
-function ChangedProduct({product}: { product: ProductJSON_Changed })
+function DisplayTable({products}: {products: TableProductJSON[]})
 {
-    const diff = product.newPrice - product.product.price;
-    const diffAbs = Math.abs(diff);
+    return <>
+        {products.map((product, i) => <TableProduct key={i} tableProduct={product}></TableProduct>)}
+    </>
+}
 
-    let productTag = <>{product.product.code} - {product.product.name}</>;
+type TableProductProps = {
+  tableProduct: TableProductJSON;
+};
 
-    if(!product.isMostRecent)
+const TableProduct: React.FC<TableProductProps> = ({ tableProduct }) => {
+    const { product, chamada, newPrice } = tableProduct;
+    const code = product.productDefinition.code;
+    const name = product.productDefinition.name;
+    const price = product.price;
+    const priceStr = price.toFixed(2);
+    const colorHex = chamada?.themeData.navColor || "#000000";
+
+    console.log(chamada);
+
+    const priceDiff = newPrice - price;
+
+    let priceColor = "#ffffff";
+    if(Math.abs(priceDiff) > 0.02)
     {
-        productTag = <><span style={{color: "#ca1e1e"}}>{product.product.code} - {product.product.name} <b>(tem outro mais recente)</b></span></>;
+
+        if(priceDiff > 0)
+        {
+            priceColor = "#118911"
+        } else {
+            priceColor = "#f19102"
+        }
     }
 
-    return (
-        <>
-            <div>
-                <span>{productTag}</span>
-                <span style={{marginLeft: "5px", color: diff > 0 ? "#1fd91f" : "orange"}}>({(diff > 0 ? "subiu " : "caiu ") + Product.formatPriceWithIPI(diffAbs, false)})</span>
-            </div>
-        </>
-    );
-}
 
-function ChangedChamada({details}: { details: ChangedDetails })
-{
     return (
-        <>
-            <div className='mb-3'>
-                <span style={{backgroundColor: details.chamadaData.theme.navColor, paddingLeft: "20px", paddingRight: "20px"}}></span>
-                <span>Chamada {details.chamadaData.chamada.id}</span>
-                <br></br>
-                <span>Produtos alterados:</span>
-                <div>
-                    {details.products.map((product, i) => <ChangedProduct key={i} product={product}></ChangedProduct>)}
-                </div>
+        <div className="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div className="d-flex align-items-center gap-2">
+                <div
+                    className="rounded small me-2"
+                    style={{
+                        padding: "0px",
+                        width: "60px",
+                        height: "30px",
+                        backgroundColor: colorHex,
+                        border: '5px solid ' + colorHex,
+                        color: 'black'
+                    }}
+                >{chamada?.id || "nenhum"}</div>
+                <span className="small">{code}</span>
+                <span className="fw-medium">{name}</span>
             </div>
-        </>
-    );
-}
-
-function DisplayChangedChamadas({changes}: { changes: ChangedDetails[] })
-{
-    return (
-        <>
-            <div>
-                {changes.map((change, i) => <ChangedChamada key={i} details={change}></ChangedChamada>)}
+            <div className="fw-semibold text-end" style={{color: priceColor}}>
+                R$ {newPrice} <span className="small">({priceDiff.toFixed(2)})</span>
             </div>
-        </>
+        </div>
     );
-}
+};
 
 export default CompareTable;

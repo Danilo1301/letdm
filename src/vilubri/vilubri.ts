@@ -1,32 +1,32 @@
 import { App } from "../app/app";
 import { PATH_DATA, PATH_UPLOADS } from "../paths";
-import { Chamada, ChamadaJSON, ChamadaPageJSON, ChamadaType, OldChamadaJSON } from "./Chamada";
+import { Chamada, ChamadaJSON, ChamadaType, ChamadaWEB } from "./Chamada";
 import { ChamadaJSON_HomeList } from "./requestTypes";
 import { Theme, ThemeJSON } from "./Theme";
-import { Product, ProductJSON_Changed } from "./Product";
+import { Product, ProductDefinition, TableProductJSON } from "./Product";
 
 import fs from 'fs'
-import express, { NextFunction } from 'express';
+import express from 'express';
 import path from "path";
 import xlsx from 'node-xlsx';
 import { ProcessPricesTableOptions } from "./processPricesTableOptions";
 import { Dado } from "../../client/app/vilubri/chamadas/chamada/ChamadaTable";
+import { VilubriData } from "./vilubriData";
 
 const PATH_CHAMADAS_FILE = path.join(PATH_DATA, "vilubri", "chamadas.json");
-const PATH_OLD_CHAMADAS_FILE = path.join(PATH_DATA, "vilubri", "old_chamadas.json");
+const PATH_PRODUCT_DEFINITIONS = path.join(PATH_DATA, "vilubri", "products.json");
 const PATH_THEMES_FILE = path.join(PATH_DATA, "vilubri", "themes.json");
 const PATH_PRODUCTIMAGES = path.join(PATH_DATA, "vilubri", "productImages");
 
 export class Vilubri extends App
 {
     private upload: any;
-    private chamadas: Map<string, Chamada> = new Map<string, Chamada>();
-    private themes: Theme[] = [];
 
     constructor(id: string, app: express.Application, upload: any)
     {
         super(id);
 
+        //Vilubri.Instance = this;
         this.upload = upload;
 
         this.setupRoutes(app);
@@ -37,9 +37,6 @@ export class Vilubri extends App
         super.start();
 
         console.log(`[Vilubri] start`);
-
-        var product = this.getMostRecentProduct("1798");
-        console.log(product);
     }
 
     public load()
@@ -53,7 +50,7 @@ export class Vilubri extends App
     {
         let mostRecentChamada: Chamada | undefined = undefined;
 
-        for (const chamada of this.chamadas.values()) {
+        for (const chamada of VilubriData.Chamadas.values()) {
 
             if(!chamada.hasProductCode(code))
                 continue;
@@ -82,7 +79,7 @@ export class Vilubri extends App
         });
 
         app.get('/api/vilubri/themes', async (req, res) => {
-            res.json(this.themes);
+            res.json(VilubriData.Themes);
         });
 
         app.get('/api/vilubri/chamadas', (req, res) => {
@@ -107,7 +104,7 @@ export class Vilubri extends App
                 return;
             }
         
-            if(this.chamadas.has(id))
+            if(VilubriData.Chamadas.has(id))
             {
                 res.status(500).send({ error: "ID already exists" });
                 return;
@@ -116,10 +113,8 @@ export class Vilubri extends App
             const chamada = this.createChamada(id, ChamadaType.CHAMADA_TABLE);
         
             this.saveData();
-        
-            console.log(chamada.toJSON());
-        
-            res.json(chamada.toJSON());
+
+            res.json(chamada.toWEB());
         });
 
         app.post('/api/vilubri/chamadas/newDefault', (req, res) => {
@@ -137,7 +132,7 @@ export class Vilubri extends App
                 return;
             }
         
-            if(this.chamadas.has(id))
+            if(VilubriData.Chamadas.has(id))
             {
                 res.status(500).send({ error: "ID already exists" });
                 return;
@@ -145,7 +140,7 @@ export class Vilubri extends App
         
             if(otherChamadaId.length > 0)
             {
-                if(!this.chamadas.has(otherChamadaId))
+                if(!VilubriData.Chamadas.has(otherChamadaId))
                 {
                     res.status(500).send({ error: "Chamada ID " + otherChamadaId + " not found. Can not copy products" });
                     return;
@@ -158,20 +153,18 @@ export class Vilubri extends App
         
             if(otherChamadaId.length > 0)
             {
-                const otherChamada = this.chamadas.get(otherChamadaId)!;
+                const otherChamada = VilubriData.Chamadas.get(otherChamadaId)!;
         
                 for(const product of otherChamada.getProductsList())
                 {
-                    const newProduct = new Product(product.name, product.code, product.description, product.price, product.hasIPI);
+                    const newProduct = new Product(product.productDefinition, product.price);
                     chamada.addProduct(newProduct);
                 }
             }
         
             this.saveData();
         
-            console.log(chamada.toJSON());
-        
-            res.json(chamada.toJSON());
+            res.json(chamada.toWEB());
         });
 
         app.get('/api/vilubri/chamadas/:id', (req, res) => {
@@ -180,7 +173,7 @@ export class Vilubri extends App
             console.log(req.url)
             console.log("body:", req.body);
         
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -188,10 +181,7 @@ export class Vilubri extends App
                 return;
             }
         
-            const json: ChamadaPageJSON = {
-                chamada: chamada.toJSON(),
-                theme: this.getThemeById(chamada.theme)!.data
-            };
+            const json: ChamadaWEB = chamada.toWEB();
             
             res.json(json);
         });
@@ -205,7 +195,7 @@ export class Vilubri extends App
         
             console.log(data);
 
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -222,14 +212,14 @@ export class Vilubri extends App
             chamada.productTables = [];
             for(const dado of data)
             {
-                const product = new Product(dado.descricao, dado.codigo, "", dado.preco, dado.temIPI);
+                const product = VilubriData.tryCreateProduct(dado.codigo, dado.descricao, "", dado.temIPI, dado.preco);
 
                 chamada.addProductToTable(dado.tabelaIndex, product);
             }
 
             this.saveChamadas();
 
-            res.json(chamada.toJSON());
+            res.json(chamada.toWEB());
         });
 
         app.post('/api/vilubri/chamadas/:id/changeTheme', (req, res) => {
@@ -243,7 +233,7 @@ export class Vilubri extends App
               return;
             }
         
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -251,7 +241,7 @@ export class Vilubri extends App
               return;
             }
 
-            const theme = this.getThemeById(themeId);
+            const theme = VilubriData.getThemeById(themeId);
             
             if(!theme)
             {
@@ -263,7 +253,7 @@ export class Vilubri extends App
         
             this.saveData();
 
-            res.json(chamada.toJSON());
+            res.json(chamada.toWEB());
         });
 
         app.post('/api/vilubri/chamadas/:id/changeDate', (req, res) => {
@@ -276,7 +266,7 @@ export class Vilubri extends App
               return;
             }
         
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -288,7 +278,7 @@ export class Vilubri extends App
         
             this.saveData();
         
-            res.json(chamada.toJSON());
+            res.json(chamada.toWEB());
         });
 
         app.post('/api/vilubri/chamadas/:id/toggleCompleteStatus', (req, res) => {
@@ -304,7 +294,7 @@ export class Vilubri extends App
               return;
             }
         
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -316,9 +306,7 @@ export class Vilubri extends App
         
             this.saveData();
         
-            console.log(chamada.toJSON());
-        
-            res.json(chamada.toJSON());
+            res.json(chamada.toWEB());
         });
 
         app.get('/api/vilubri/product/:code', (req, res) => {
@@ -326,11 +314,11 @@ export class Vilubri extends App
             
             let product: Product | undefined;
 
-            for(const chamada of this.chamadas.values())
+            for(const chamada of VilubriData.Chamadas.values())
             {
                 for(const p of chamada.getProductsList())
                 {
-                    if(p.code == code)
+                    if(p.productDefinition.code == code)
                     {
                         product = p;
                         break;
@@ -344,7 +332,7 @@ export class Vilubri extends App
                 return;
             }
 
-            var json = product.toJSON()
+            var json = product.toWEB();
 
             res.json(json);
         });
@@ -356,7 +344,7 @@ export class Vilubri extends App
             console.log(req.url)
             console.log("body:", req.body);
         
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -372,7 +360,7 @@ export class Vilubri extends App
         
             const product = chamada.productTables[0][productIndex];
         
-            res.json(product.toJSON());
+            res.json(product.toWEB());
         });
 
         app.post('/api/vilubri/chamadas/:id/products/new', this.upload.single('file'), (req, res) => {
@@ -382,7 +370,7 @@ export class Vilubri extends App
             console.log(req.url)
             console.log("body:", req.body);
         
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -399,7 +387,7 @@ export class Vilubri extends App
             const code: string = req.body.code;
             const name: string = req.body.product_name;
             const description: string = req.body.description;
-            const price: string = req.body.price;
+            const priceStr: string = req.body.price;
         
             if(chamada.hasProductCode(code))
             {
@@ -407,9 +395,11 @@ export class Vilubri extends App
                 return;
             }
         
-            const priceFormat = Product.parsePriceWithIPI(price);
+            const priceFormat = Product.parsePriceWithIPI(priceStr)
+            const price = priceFormat[0];
+            const hasIPI = priceFormat[1];
 
-            const product = new Product(name, code, description, priceFormat[0], priceFormat[1]);
+            const product = VilubriData.tryCreateProduct(code, name, description, hasIPI, price);
         
             chamada.addProduct(product);
         
@@ -436,7 +426,7 @@ export class Vilubri extends App
                 fs.renameSync(oldFilePath, newImagePath);
             }
         
-            res.json(product.toJSON());
+            res.json(product.toWEB());
         });
 
         app.post('/api/vilubri/chamadas/:id/delete', (req, res) => {
@@ -446,7 +436,7 @@ export class Vilubri extends App
             console.log(req.url)
             console.log("body:", req.body);
         
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -460,7 +450,7 @@ export class Vilubri extends App
                 return;
             }
         
-            this.chamadas.delete(id);
+            VilubriData.Chamadas.delete(id);
         
             this.saveData();
         
@@ -472,7 +462,7 @@ export class Vilubri extends App
             const key: string = req.body.key;
             const dateStr: string = req.body.date;
         
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -508,7 +498,7 @@ export class Vilubri extends App
             console.log(req.url)
             console.log("body:", req.body);
 
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
 
             if(!chamada)
             {
@@ -541,10 +531,10 @@ export class Vilubri extends App
             const priceFormat = Product.parsePriceWithIPI(price);
 
             //product.code = code;
-            product.name = name;
-            product.description = description;
+            product.productDefinition.name = name;
+            product.productDefinition.description = name;
+            product.productDefinition.hasIPI = priceFormat[1];
             product.price = priceFormat[0];
-            product.hasIPI = priceFormat[1];
 
             this.saveData();
 
@@ -565,7 +555,7 @@ export class Vilubri extends App
                 return;
             }
         
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -595,7 +585,7 @@ export class Vilubri extends App
             console.log(req.url)
             console.log("body:", req.body);
         
-            const chamada = this.chamadas.get(id);
+            const chamada = VilubriData.Chamadas.get(id);
         
             if(!chamada)
             {
@@ -668,17 +658,17 @@ export class Vilubri extends App
             console.log(req.url)
             console.log("body:", req.body);
         
-            const json: ChamadaJSON[] = [];
+            const json: ChamadaWEB[] = [];
         
-            for(const chamada of this.chamadas.values())
+            for(const chamada of VilubriData.Chamadas.values())
             {
                 console.log(`Loopíng products for chamada ${chamada.id}...`);
                 for(const product of chamada.getProductsList())
                 {
-                    if(product.name.toLowerCase().includes(name.toLowerCase()) || product.code.includes(name))
+                    if(product.productDefinition.name.toLowerCase().includes(name.toLowerCase()) || product.productDefinition.code.includes(name))
                     {
-                        console.log(`Found product ${product.name}`)
-                        json.push(chamada.toJSON());
+                        console.log(`Found product ${product.productDefinition.name}`)
+                        json.push(chamada.toWEB());
                         break;
                     }
                 }
@@ -705,7 +695,7 @@ export class Vilubri extends App
         const codeTableId = tableIds[options.code];
         const priceTableId = tableIds[options.price];
 
-        const products: ProductJSON_Changed[] = [];
+        const products: TableProductJSON[] = [];
         
         const data = workSheetsFromFile[0].data;
         for(const a of data)
@@ -722,45 +712,69 @@ export class Vilubri extends App
 
             const latestProduct = this.getMostRecentProduct(code);
 
-            for(const chamada of this.chamadas.values())
+            if(latestProduct != undefined)
             {
-                const product = chamada.getProductByCode(code);
-
-                if(product == undefined) continue;
-
-                const oldPrice = product.price;
-        
-                const diff = Math.abs(oldPrice - price);
-         
-                const changedPrice = diff >= options.minPriceChange;
-
-                if(changedPrice)
-                {
-                    console.log(`Product: ${code}`);
-                    console.log(`Old price:`, oldPrice);
-                    console.log(`New price:`, price);
-                    console.log(`Diff: ${diff} >= ${options.minPriceChange}`);
-                }
-
-                const chamadaJson: ChamadaPageJSON = {
-                    chamada: chamada.toJSON(),
-                    theme: this.getThemeById(chamada.theme)!.data
-                };
+                const chamada = latestProduct.chamada!;
 
                 products.push({
-                    product: product.toJSON(),
-                    chamadaData: chamadaJson,
+                    product: latestProduct.toWEB(),
+                    chamada: chamada.toWEB(),
                     newPrice: price,
-                    newProduct: false,
-                    changedPrice: changedPrice,
-                    isMostRecent: product.price == latestProduct?.price
-                });
 
-                if(changedPrice)
-                {
-                    console.log(`Price changed!`);
-                }
+                    isNewProduct: false
+                });
+            } else {
+                const product = VilubriData.tryCreateProduct(code, name, "", false, price);
+
+                products.push({
+                    product: product.toWEB(),
+                    chamada: undefined,
+                    newPrice: price,
+
+                    isNewProduct: true
+                });
             }
+
+            this.saveProductDefinitions();
+
+            // for(const chamada of VilubriData.Chamadas.values())
+            // {
+            //     const product = chamada.getProductByCode(code);
+
+            //     if(product == undefined) continue;
+
+            //     const oldPrice = product.price;
+        
+            //     const diff = Math.abs(oldPrice - price);
+         
+            //     const changedPrice = diff >= options.minPriceChange;
+
+            //     if(changedPrice)
+            //     {
+            //         console.log(`Product: ${code}`);
+            //         console.log(`Old price:`, oldPrice);
+            //         console.log(`New price:`, price);
+            //         console.log(`Diff: ${diff} >= ${options.minPriceChange}`);
+            //     }
+
+            //     const chamadaJson: ChamadaPageJSON = {
+            //         chamada: chamada.toJSON(),
+            //         theme: this.getThemeById(chamada.theme)!.data
+            //     };
+
+            //     products.push({
+            //         product: product.toJSON(),
+            //         chamadaPage: chamadaJson,
+            //         newPrice: price,
+
+            //         isNewProduct: false
+            //     });
+
+            //     if(changedPrice)
+            //     {
+            //         console.log(`Price changed!`);
+            //     }
+            // }
         }
 
         return products;
@@ -774,8 +788,9 @@ export class Vilubri extends App
     public loadData()
     {
         this.loadThemes();
+        this.loadProductDefinitions();
         this.loadChamadas();
-        this.convertOldChamadas();
+        //this.convertOldChamadas();
     }
 
     public loadThemes()
@@ -791,90 +806,207 @@ export class Vilubri extends App
                 data: data[id]
             }
 
-            this.themes.push(theme);
+            VilubriData.Themes.push(theme);
         }
+    }
+
+    public loadProductDefinitions()
+    {
+        const PATH_TEST_DEF = path.join(PATH_DATA, "vilubri", "chamadas_def.json");
+
+        // if(fs.existsSync(PATH_TEST_DEF))
+        // {
+        //     const data: {[key: string]: any} = JSON.parse(fs.readFileSync(PATH_CHAMADAS_FILE, "utf-8"));
+
+        //     console.log(data);
+
+        //     for(const id in data)
+        //     {
+        //         const json = data[id];
+
+        //         //console.log(json);
+
+        //         for(const table of json.productTables)
+        //         {
+        //             for(const product of table)
+        //             {
+        //                 console.log(product.code);
+
+        //                 this.tryCreateProductDefinition(product.code, product.name, product.descricao, product.hasIPI);;
+        //             }
+        //         }
+        //     }
+
+        //     console.log(VilubriData.Products);
+
+        //     this.saveProductDefinitions();
+        // }
+
+        if(fs.existsSync(PATH_PRODUCT_DEFINITIONS))
+        {
+            VilubriData.Products.clear();
+
+            const data: {[key: string]: ProductDefinition} = JSON.parse(fs.readFileSync(PATH_PRODUCT_DEFINITIONS, "utf-8"));
+
+            for(const id in data)
+            {
+                const def = data[id];
+
+                VilubriData.Products.set(id, def);
+            }
+        }
+
+        console.log(`${VilubriData.Products.size} products definitions`);
     }
 
     public loadChamadas()
     {
-        if(!fs.existsSync(PATH_CHAMADAS_FILE)) return;
-
-        const data: {[key: string]: ChamadaJSON} = JSON.parse(fs.readFileSync(PATH_CHAMADAS_FILE, "utf-8"));
-
-        for(const id in data)
+        if(fs.existsSync(PATH_CHAMADAS_FILE))
         {
-            const json = data[id];
-            const chamada = this.createChamada(id, json.type);
+            if(VilubriData.Products.size > 0)
+            {
+                const data: {[key: string]: ChamadaJSON} = JSON.parse(fs.readFileSync(PATH_CHAMADAS_FILE, "utf-8"));
 
-            chamada.loadFromJSON(data[id]);
-        }
-    }
+                for(const id in data)
+                {
+                    const json = data[id];
+                    const chamada = this.createChamada(id, json.type);
 
-    public convertOldChamadas()
-    {
-        if(!fs.existsSync(PATH_OLD_CHAMADAS_FILE)) return;
-
-        const allJsons: {[key: string]: OldChamadaJSON} = JSON.parse(fs.readFileSync(PATH_OLD_CHAMADAS_FILE, "utf-8"));
-
-        for(const id in allJsons)
-        {
-            const data = allJsons[id];
-
-            const chamada = this.createChamada(id, ChamadaType.CHAMADA_DEFAULT);
-
-            if (data.theme === undefined) {
-                data.theme = chamada.theme;
+                    chamada.loadFromJSON(data[id]);
+                }
             }
+        }
 
-            chamada.date = new Date(data.date);
-            chamada.createdDate = new Date(data.createdDate);
-            chamada.isCompleted = data.completed;
-            chamada.theme = data.theme;
+        const PATH_CHAMADAS_OLD = path.join(PATH_DATA, "vilubri", "chamadas_old.json");
 
-            chamada.productTables = []; // limpa qualquer dado anterior
-            chamada.productTables.push([]);
+        if(fs.existsSync(PATH_CHAMADAS_OLD))
+        {
+            const data: {[key: string]: any} = JSON.parse(fs.readFileSync(PATH_CHAMADAS_OLD, "utf-8"));
 
-            for (const productJson of data.products) {
-                let price = productJson.price;
-                let hasIPI = false;
+            console.log(data);
 
-                if (typeof price === 'string') {
-                    const result = Product.parsePriceWithIPI(price);
-                    price = result[0];
-                    hasIPI = result[1];
+            for(const id in data)
+            {
+                const json = data[id];
+                
+                if(VilubriData.Chamadas.has(id))
+                {
+                    console.log("Chamada antiga " + id + " ja criada!")
+                    continue;
                 }
 
-                const product = new Product(
-                    productJson.name,
-                    productJson.code,
-                    productJson.description,
-                    price,
-                    hasIPI
-                );
+                //console.log(json);
+                const chamada = this.createChamada(id, json.type);
+                chamada.date = new Date(json.date);
+                chamada.createdDate = new Date(json.createdDate);
+                chamada.isCompleted = json.completed;
+                chamada.theme = json.theme;
 
-                product.chamada = chamada;
+                for (let tableIndex = 0; tableIndex < json.productTables.length; tableIndex++) {
+                    const table = json.productTables[tableIndex];
+  
+                    for(const productJson of table)
+                    {
+                        //console.log(product.code);
+                        //console.log(productJson);
 
-                chamada.productTables[0].push(product);
+                        //console.log(product);
+                        const product = VilubriData.tryCreateProduct(productJson.code, productJson.name, productJson.description, productJson.hasIPI, productJson.price);
+
+                        chamada.addProductToTable(tableIndex, product);
+                    }
+                    
+                }
             }
 
-            if (data.createdDate === 0) {
-                chamada.createdDate = new Date();
-            }
+            this.saveChamadas();
+            this.saveProductDefinitions();
         }
 
-        this.saveChamadas();
+        // converter chamadas.json antigas e criar definitions caso nao exista, salvar apenas definitions
+
+        // depois carregar normalmente as chamadas
+
+
+
+
+
+
+
+
+
+
+
+
+        
     }
+
+    // public convertOldChamadas()
+    // {
+    //     if(!fs.existsSync(PATH_OLD_CHAMADAS_FILE)) return;
+
+    //     const allJsons: {[key: string]: OldChamadaJSON} = JSON.parse(fs.readFileSync(PATH_OLD_CHAMADAS_FILE, "utf-8"));
+
+    //     for(const id in allJsons)
+    //     {
+    //         const data = allJsons[id];
+
+    //         const chamada = this.createChamada(id, ChamadaType.CHAMADA_DEFAULT);
+
+    //         if (data.theme === undefined) {
+    //             data.theme = chamada.theme;
+    //         }
+
+    //         chamada.date = new Date(data.date);
+    //         chamada.createdDate = new Date(data.createdDate);
+    //         chamada.isCompleted = data.completed;
+    //         chamada.theme = data.theme;
+
+    //         chamada.productTables = []; // limpa qualquer dado anterior
+    //         chamada.productTables.push([]);
+
+    //         for (const productJson of data.products) {
+    //             let price = productJson.price;
+    //             let hasIPI = false;
+
+    //             if (typeof price === 'string') {
+    //                 const result = Product.parsePriceWithIPI(price);
+    //                 price = result[0];
+    //                 hasIPI = result[1];
+    //             }
+
+    //             const product = new Product(
+    //                 productJson.name,
+    //                 productJson.code,
+    //                 productJson.description,
+    //                 price,
+    //                 hasIPI
+    //             );
+
+    //             product.chamada = chamada;
+
+    //             chamada.productTables[0].push(product);
+    //         }
+
+    //         if (data.createdDate === 0) {
+    //             chamada.createdDate = new Date();
+    //         }
+    //     }
+
+    //     this.saveChamadas();
+    // }
 
     public saveData()
     {
         this.saveChamadas();
+        this.saveProductDefinitions();
     }
 
     public saveChamadas()
     {
         const data: {[key: string]: ChamadaJSON} = {};
 
-        for(const chamada of this.chamadas.values())
+        for(const chamada of VilubriData.Chamadas.values())
         {
             const chamadaJson = chamada.toJSON();
             data[chamada.id] = chamadaJson;
@@ -883,10 +1015,22 @@ export class Vilubri extends App
         fs.writeFileSync(PATH_CHAMADAS_FILE, JSON.stringify(data));
     }
 
+    public saveProductDefinitions()
+    {
+        const data: {[key: string]: ProductDefinition} = {};
+
+        for(const def of VilubriData.Products.values())
+        {
+            data[def.code] = def;
+        } 
+
+        fs.writeFileSync(PATH_PRODUCT_DEFINITIONS, JSON.stringify(data));
+    }
+
     public createChamada(id: string, type: ChamadaType)
     {
         const chamada = new Chamada(id, type);
-        this.chamadas.set(id, chamada);
+        VilubriData.Chamadas.set(id, chamada);
         return chamada;
     }
 
@@ -894,29 +1038,19 @@ export class Vilubri extends App
     {
         const items: ChamadaJSON_HomeList[] = [];
 
-        this.chamadas.forEach(chamada => {
+        VilubriData.Chamadas.forEach(chamada => {
             const item: ChamadaJSON_HomeList = {
                 id: chamada.id,
                 numProducts: chamada.getProductsList().length,
                 date: chamada.date.getTime(),
                 completed: chamada.isCompleted,
-                theme: this.getThemeById(chamada.theme)!.data
+                theme: VilubriData.getThemeById(chamada.theme)!.data
             };
             
             items.push(item);
         });
 
         return items;
-    }
-
-    public getThemeById(id: string)
-    {
-        for(const theme of this.themes)
-        {
-            if(theme.id != id) continue;
-
-            return theme;
-        }
     }
 }
 

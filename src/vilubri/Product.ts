@@ -1,53 +1,63 @@
-import { Chamada, ChamadaPageJSON } from "./Chamada";
+import { Chamada, ChamadaWEB } from "./Chamada";
+
+export interface ProductDefinition
+{
+    code: string;
+    name: string;
+    description: string;
+    hasIPI: boolean;
+}
 
 export interface ProductJSON {
-    name: string;
-    code: string;
-    description: string;
+    productCode: string;
     price: number;
-    hasIPI: boolean;
+}
+
+export interface ProductWEB {
+    productDefinition: ProductDefinition;
+    price: number;
     index: number;
 }
 
-export interface ProductJSON_Changed {
-    product: ProductJSON;
-    chamadaData: ChamadaPageJSON | undefined;
+export interface TableProductJSON {
+    product: ProductWEB;
+    chamada: ChamadaWEB | undefined;
     newPrice: number;
-    newProduct: boolean;
-    changedPrice: boolean;
-    isMostRecent: boolean;
+
+    isNewProduct: boolean;
 }
 
 export class Product {
-    public name: string;
-    public code: string;
-    public description: string;
+    public productDefinition: ProductDefinition;
     public price: number;
-    public hasIPI: boolean;
 
     public chamada?: Chamada;
 
-    constructor(name: string, code: string, description: string, price: number, hasIPI: boolean)
+    constructor(productDefinition: ProductDefinition, price: number)
     {
-        this.name = name;
-        this.code = code;
-        this.description = description;
+        this.productDefinition = productDefinition;
         this.price = price;
-        this.hasIPI = hasIPI;
     }
 
     public toJSON()
     {
         const json: ProductJSON = {
-            name: this.name,
-            code: this.code,
-            description: this.description,
-            price: this.price,
-            hasIPI: this.hasIPI,
-            index: this.chamada ? this.chamada.findProductIndex(this) : -1
+            productCode: this.productDefinition.code,
+            price: this.price
         }
 
         return json;
+    }
+
+    public toWEB()
+    {
+        const web: ProductWEB = {
+            productDefinition: this.productDefinition,
+            price: this.price,
+            index: this.chamada ? this.chamada.findProductIndex(this) : -1
+        }
+
+        return web;
     }
 
     public static parsePriceWithIPI(input: string): [number, boolean] {

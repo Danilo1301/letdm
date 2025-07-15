@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Product, ProductJSON } from '../../../../../../src/vilubri/Product';
+import { Product, ProductJSON, ProductWEB } from '../../../../../../src/vilubri/Product';
 import { getLetDM_Key } from '../../../../../components/cookies';
 import { showConfirmWindow } from '../../../Vilubri';
 
@@ -33,10 +33,10 @@ function NewProduct() {
 
                 if(response.ok)
                 {
-                    const productJson: ProductJSON = data;
+                    const productJson: ProductWEB = data;
 
-                    setName(productJson.name);
-                    setDescription(productJson.description);
+                    setName(productJson.productDefinition.name);
+                    setDescription(productJson.productDefinition.description);
 
                     return;
                 }
