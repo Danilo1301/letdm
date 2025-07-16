@@ -100,34 +100,43 @@ const StepElement: React.FC<{ step: Step; index: number; resetCurrentStepIndex: 
     console.log("hex", step.customColor);
     console.log("rgba", hexToRgba(step.customColor));
 
-    return hexToRgba(step.customColor);
+    return hexToRgba(step.customColor, true);
   });
   const [localLedColor, setLocalLedColor] = useState(() => hexToRgba(step.customLedColor));
 
-
-  const updateColor = (newRgb: { r: number; g: number; b: number; a?: number }, led: boolean) => {
+  const updateCoronaColor = (newRgb: { r: number; g: number; b: number; a?: number }) => {
 
     const newLocalColor = {r: newRgb.r, g: newRgb.g, b: newRgb.b, a: newRgb.a!};
 
-    if (led) {
-        setLocalLedColor(newLocalColor);
-    } else {
-        setLocalCoronaColor(newLocalColor);
-    }
+    setLocalCoronaColor(newLocalColor);
 
     const hex = rgbaToHex(newRgb);
     const newSteps = pattern.steps.map((s, i) => {
       if (i !== index) return s;
-      return { ...s, [led ? 'customLedColor' : 'customColor']: hex };
+      return { ...s, ['customColor']: hex };
+    });
+    setPattern({ steps: newSteps });
+  };
+
+  const updateLedColor = (newRgb: { r: number; g: number; b: number; a?: number}) => {
+
+    const newLocalColor = {r: newRgb.r, g: newRgb.g, b: newRgb.b, a: newRgb.a!};
+
+    setLocalLedColor(newLocalColor);
+
+    const hex = rgbaToHex(newRgb);
+    const newSteps = pattern.steps.map((s, i) => {
+      if (i !== index) return s;
+      return { ...s, ['customLedColor']: hex };
     });
     setPattern({ steps: newSteps });
   };
 
   // Handler do input color html padrão
-  const onInputColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onInputCoronaColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const hex = e.target.value;
     const rgba = hexToRgba(hex);
-    updateColor({ ...rgba, a: localCoronaColor.a }, false);
+    updateCoronaColor({ ...rgba, a: localCoronaColor.a });
   };
 
   return (
@@ -150,22 +159,57 @@ const StepElement: React.FC<{ step: Step; index: number; resetCurrentStepIndex: 
 
       {useCustomColor && (
         <div>
-          <div className='my-2'>
-            <label>Cor (Corona)</label>
-            {/* Input padrão de cor */}
+          <div className="my-2 d-flex align-items-center gap-2">
+            <label style={{ whiteSpace: 'nowrap' }}>Cor (Corona):</label>
+
+            {/* Color Picker */}
             <input
               type="color"
-              value={rgbaToHex(localCoronaColor).slice(0, 7)} // só #RRGGBB pro input padrão
-              onChange={onInputColorChange}
+              value={rgbaToHex(localCoronaColor).slice(0, 7)} // só #RRGGBB
+              onChange={onInputCoronaColorChange}
+              style={{ width: '40px', height: '30px', padding: 0, border: 'none' }}
             />
-            {/* Alpha picker separado */}
-            <AlphaPicker
-              color={localCoronaColor}
-              onChange={c => updateColor({ ...c.rgb }, false)}
+
+            {/* Inputs de RGBA */}
+            <input
+              type="number"
+              min={0}
+              max={255}
+              value={localCoronaColor.r}
+              onChange={(e) => updateCoronaColor({ ...localCoronaColor, r: +e.target.value },)}
+              style={{ width: '50px' }}
+              placeholder="R"
+            />
+            <input
+              type="number"
+              min={0}
+              max={255}
+              value={localCoronaColor.g}
+              onChange={(e) => updateCoronaColor({ ...localCoronaColor, g: +e.target.value })}
+              style={{ width: '50px' }}
+              placeholder="G"
+            />
+            <input
+              type="number"
+              min={0}
+              max={255}
+              value={localCoronaColor.b}
+              onChange={(e) => updateCoronaColor({ ...localCoronaColor, b: +e.target.value })}
+              style={{ width: '50px' }}
+              placeholder="B"
+            />
+            <input
+              type="number"
+              min={0}
+              max={255}
+              value={localCoronaColor.a}
+              onChange={(e) => updateCoronaColor({ ...localCoronaColor, a: +e.target.value })}
+              style={{ width: '50px' }}
+              placeholder="A"
             />
           </div>
 
-          <div className='my-2'>
+          <div className="my-2 d-flex align-items-center gap-2">
             <label>Cor (LED)</label>
             {/* Se quiser fazer igual, pode repetir o esquema aqui */}
             <input
@@ -173,10 +217,37 @@ const StepElement: React.FC<{ step: Step; index: number; resetCurrentStepIndex: 
               value={step.customLedColor.slice(0, 7)}
               onChange={e => {
                 const c = hexToRgba(e.target.value);
-                updateColor({ ...c, a: 1 }, true);
+                updateLedColor({ ...c, a: 1 });
               }}
             />
-            {/* Ou usar um AlphaPicker também */}
+             {/* Inputs de RGBA */}
+            <input
+              type="number"
+              min={0}
+              max={255}
+              value={localLedColor.r}
+              onChange={(e) => updateLedColor({ ...localLedColor, r: +e.target.value },)}
+              style={{ width: '50px' }}
+              placeholder="R"
+            />
+            <input
+              type="number"
+              min={0}
+              max={255}
+              value={localLedColor.g}
+              onChange={(e) => updateLedColor({ ...localLedColor, g: +e.target.value })}
+              style={{ width: '50px' }}
+              placeholder="G"
+            />
+            <input
+              type="number"
+              min={0}
+              max={255}
+              value={localLedColor.b}
+              onChange={(e) => updateLedColor({ ...localLedColor, b: +e.target.value })}
+              style={{ width: '50px' }}
+              placeholder="B"
+            />
           </div>
         </div>
       )}
@@ -234,10 +305,17 @@ const PatternsPage: React.FC = () => {
 
   const addStepAtIndex = (index: number) => {
     // Cria novo step baseado no último step atual (ou default)
-    //const lastStep = pattern.steps[index - 1];
+
+    let lastStep: Step | undefined = pattern.steps[pattern.steps.length - 1];
+
+    const values: number[] = [];
+    for (let i = 0; i < lastStep.values.length; i++) {
+      values.push(0);
+    }
+
     const newStep = createStep(
         300,
-        [1, 1, 1]
+        values
     )
 
     // Cria nova lista de steps com o novo inserido na posição desejada
@@ -376,6 +454,17 @@ const PatternsPage: React.FC = () => {
             />
             <button onClick={handleClick} className="btn btn-secondary btn-sm">
                 Adicionar step
+            </button>
+        </div>
+        <div className="d-flex align-items-center gap-2 my-3">
+            <input
+                type="tezt"
+                value={"final"}
+                style={{ width: '80px' }}
+                className="form-control form-control-sm"
+            />
+            <button onClick={() => addStepAtIndex(pattern.steps.length)} className="btn btn-secondary btn-sm">
+                Adicionar step no final
             </button>
         </div>
 
