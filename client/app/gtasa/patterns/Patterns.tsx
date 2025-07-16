@@ -1,284 +1,497 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-
+// Patterns.tsx
+import React, { createContext, useContext, useState, useEffect, useSyncExternalStore } from 'react';
+import { AlphaPicker, ChromePicker, ColorResult } from 'react-color';
 import './Patterns.css';
+import BasicModal from '../../components/BasicModal';
 import NumberPicker from '../../components/NumberPicker';
 
-type GlobalContextType = {
+// Tipos principais
+interface Step {
+    id: string; // nova propriedade
+    time: number;
+    values: number[];
+    useCustomColor: boolean;
+    customColor: string;
+    useCustomLedColor: boolean;
+    customLedColor: string;
+}
+
+const createStep = (time: number, values: number[]): Step => ({
+    id: Date.now().toString() + Math.random().toString(36).substring(2),
+    time,
+    values,
+    useCustomColor: false,
+    customColor: '#0000ff',
+    useCustomLedColor: false,
+    customLedColor: '#ffffff',
+});
+
+interface Pattern {
+  steps: Step[];
+}
+
+interface GlobalContextType {
   useCustomColor: boolean;
-  setUseCustomColor: (value: boolean) => void;
-};
+  setUseCustomColor: (v: boolean) => void;
+  pattern: Pattern;
+  setPattern: (p: Pattern) => void;
+}
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 
-export const GlobalContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [useCustomColor, setUseCustomColor] = useState(false);
 
+    const [pattern, setPattern] = useState<Pattern>({
+        steps: [
+            createStep(300, [1, 1, 0]),
+            createStep(300, [0, 0, 0]),
+            createStep(300, [1, 1, 0]),
+        ],
+    });
+
   return (
-    <GlobalContext.Provider value={{ useCustomColor, setUseCustomColor }}>
+    <GlobalContext.Provider value={{ useCustomColor, setUseCustomColor, pattern, setPattern }}>
       {children}
     </GlobalContext.Provider>
   );
 };
 
-// Hook de acesso mais fácil
-export const useGlobalContext = () => {
-  const context = useContext(GlobalContext);
-  if (!context) {
-    throw new Error("useGlobalContext deve ser usado dentro de um <ColorProvider>");
-  }
-  return context;
+const useGlobal = () => {
+  const ctx = useContext(GlobalContext);
+  if (!ctx) throw new Error("useGlobal must be used inside GlobalProvider");
+  return ctx;
 };
 
-let defaultPattern: Pattern | undefined;
+const Led: React.FC<{ on: boolean; step: Step; useCustomColor: boolean }> = ({ on, step, useCustomColor }) => {
+  const bg = on ? (useCustomColor ? step.customColor : 'red') : 'transparent';
+  const inside = on ? (useCustomColor ? step.customLedColor : 'white') : 'black';
+  return <div className='led' style={{ backgroundColor: bg }}><div className='led-inside' style={{ backgroundColor: inside }} /></div>;
+};
+
+const StepToggleButton: React.FC<{ stepIndex: number; ledIndex: number; value: number }> = ({ stepIndex, ledIndex, value }) => {
+  const { pattern, setPattern } = useGlobal();
+  const toggle = () => {
+    const newSteps = pattern.steps.map((step, i) => i === stepIndex
+      ? { ...step, values: step.values.map((v, vi) => vi === ledIndex ? (v === 1 ? 0 : 1) : v) }
+      : step);
+    setPattern({ steps: newSteps });
+  };
+  const backgroundColor = value == 1 ? "#ffffff" : "#414141";
+  const textColor = value == 1 ? "#000000" : "#ffffff";
+  return <div style={{backgroundColor: backgroundColor, color: textColor}} className='led-toggle' onClick={toggle}>{value}</div>;
+};
+
+const StepElement: React.FC<{ step: Step; index: number; resetCurrentStepIndex: () => void }> = ({ step, index, resetCurrentStepIndex }) => {
+  const { useCustomColor, pattern, setPattern } = useGlobal();
+
+  const [localTime, setLocalTime] = useState(`${step.time}`);
+
+  const updateTime = (val: string) => {
+    const time = parseInt(val) || 1;
+    setLocalTime(val);
+    const newSteps = pattern.steps.map((s, i) => i === index ? { ...s, time } : s);
+    setPattern({ steps: newSteps });
+  };
+  
+  // Armazenar a cor como rgba localmente para poder atualizar alpha e rgb separadamente
+  const [localCoronaColor, setLocalCoronaColor] = useState(() => {
+
+    console.log("hex", step.customColor);
+    console.log("rgba", hexToRgba(step.customColor));
+
+    return hexToRgba(step.customColor);
+  });
+  const [localLedColor, setLocalLedColor] = useState(() => hexToRgba(step.customLedColor));
+
+
+  const updateColor = (newRgb: { r: number; g: number; b: number; a?: number }, led: boolean) => {
+
+    const newLocalColor = {r: newRgb.r, g: newRgb.g, b: newRgb.b, a: newRgb.a!};
+
+    if (led) {
+        setLocalLedColor(newLocalColor);
+    } else {
+        setLocalCoronaColor(newLocalColor);
+    }
+
+    const hex = rgbaToHex(newRgb);
+    const newSteps = pattern.steps.map((s, i) => {
+      if (i !== index) return s;
+      return { ...s, [led ? 'customLedColor' : 'customColor']: hex };
+    });
+    setPattern({ steps: newSteps });
+  };
+
+  // Handler do input color html padrão
+  const onInputColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const hex = e.target.value;
+    const rgba = hexToRgba(hex);
+    updateColor({ ...rgba, a: localCoronaColor.a }, false);
+  };
+
+  return (
+    <div className='p-2 border rounded mt-2'>
+      <button className='btn btn-sm btn-outline-danger' onClick={() => {
+        const newSteps = pattern.steps.filter((_, i) => i !== index);
+        setPattern({ steps: newSteps });
+        resetCurrentStepIndex();
+      }}>X</button>
+
+      <span style={{ marginLeft: "10px" }}>Índice: {index}</span>
+      
+      <div className='my-2'>
+        <label className='me-2'>Tempo</label>
+        <input type='number' value={localTime} onChange={e => updateTime(e.target.value)} />
+      </div>
+
+      <div className='d-flex'>{step.values.map((v, i) => <StepToggleButton key={i} stepIndex={index} ledIndex={i} value={v} />)}</div>
+
+
+      {useCustomColor && (
+        <div>
+          <div className='my-2'>
+            <label>Cor (Corona)</label>
+            {/* Input padrão de cor */}
+            <input
+              type="color"
+              value={rgbaToHex(localCoronaColor).slice(0, 7)} // só #RRGGBB pro input padrão
+              onChange={onInputColorChange}
+            />
+            {/* Alpha picker separado */}
+            <AlphaPicker
+              color={localCoronaColor}
+              onChange={c => updateColor({ ...c.rgb }, false)}
+            />
+          </div>
+
+          <div className='my-2'>
+            <label>Cor (LED)</label>
+            {/* Se quiser fazer igual, pode repetir o esquema aqui */}
+            <input
+              type="color"
+              value={step.customLedColor.slice(0, 7)}
+              onChange={e => {
+                const c = hexToRgba(e.target.value);
+                updateColor({ ...c, a: 1 }, true);
+              }}
+            />
+            {/* Ou usar um AlphaPicker também */}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const PatternsPage: React.FC = () => {
-    
-    if(!defaultPattern)
+  const { pattern, setPattern, useCustomColor, setUseCustomColor } = useGlobal();
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const resetCurrentStepIndex = () => setCurrentStepIndex(0);
+  const [indexStr, setIndexStr] = useState('');
+
+  const current = pattern.steps[currentStepIndex];
+
+  const [numOfLeds, setNumOfLeds] = useState(current.values.length);
+
+  React.useEffect(() => {
+
+    for(const step of pattern.steps)
     {
-        const p = new Pattern();
-        p.addStep(300, [1, 1, 0, 0]);
-        p.addStep(300, [0, 0, 0, 0]);
-        p.addStep(300, [0, 0, 1, 1]);
-        p.addStep(300, [0, 0, 0, 0]);
-
-        defaultPattern = p;
-    }
-
-    const currentStepIndexRef = useRef(0);
-    const [currentStep, setCurrentStep] = useState<Step | undefined>();
-
-    const [numOfLeds, setNumOfLeds] = useState(defaultPattern!.steps[0].values.length);
-
-    const {useCustomColor, setUseCustomColor} = useGlobalContext();
-
-    const timeElapsedRef = useRef(0);
-    const lastTickRef = useRef(Date.now());
-    const intervalRef = useRef<NodeJS.Timeout>();
-
-    const [pattern] = useState<Pattern>(() => {
-        return defaultPattern!;
-    });
-
-    const handleToggleCustomColor = () => {
-        setUseCustomColor(!useCustomColor);
-    }
-
-    // Atualiza currentStep sempre que currentStepIndex mudar
-    useEffect(() => {
-        const step = pattern.steps[currentStepIndexRef.current];
-        if (step) setCurrentStep(step);
-    }, [currentStepIndexRef, pattern]);
-
-    // Tick principal
-    const tick = () => {
-        const now = Date.now();
-        const diff = now - lastTickRef.current;
-        lastTickRef.current = now;
-
-        timeElapsedRef.current += diff;
-
-        const step = pattern.steps[currentStepIndexRef.current];
-        if (step) {
-            if (timeElapsedRef.current >= step.time) {
-                timeElapsedRef.current = 0;
-
-                const next = (currentStepIndexRef.current + 1) % pattern.steps.length;
-                currentStepIndexRef.current = next;
-
-                const newStep = pattern.steps[currentStepIndexRef.current];
-                setCurrentStep(newStep);
-            }
+        while(step.values.length < numOfLeds)
+        {
+            step.values.push(0);
         }
+        while(step.values.length > numOfLeds)
+        {
+            step.values.pop();
+        }
+    }
 
+    setPattern(pattern);
+
+  }, [numOfLeds]);
+
+  if (pattern.steps.length === 0) {
+    return <div>Não há passos no padrão.</div>;
+    }
+
+  useEffect(() => {
+    if (pattern.steps.length === 0) return;  // proteção
+
+    const interval = setInterval(() => {
+        setCurrentStepIndex(prev => (prev + 1) % pattern.steps.length);
+    }, pattern.steps[currentStepIndex]?.time || 300); // fallback de 300ms
+
+    return () => clearInterval(interval);
+    }, [pattern, currentStepIndex]);
+
+  
+
+  const toggleColorMode = () => {
+    setUseCustomColor(!useCustomColor);
+  };
+
+  const addStepAtIndex = (index: number) => {
+    // Cria novo step baseado no último step atual (ou default)
+    //const lastStep = pattern.steps[index - 1];
+    const newStep = createStep(
+        300,
+        [1, 1, 1]
+    )
+
+    // Cria nova lista de steps com o novo inserido na posição desejada
+    const newSteps = [
+        ...pattern.steps.slice(0, index),
+        newStep,
+        ...pattern.steps.slice(index),
+    ];
+
+    setPattern({ steps: newSteps });
     };
 
-     // Inicia o loop
-    useEffect(() => {
-        intervalRef.current = setInterval(tick, 10);
+     const handleClick = () => {
+        const index = parseInt(indexStr);
+        if (!isNaN(index) && index >= 0) {
+            addStepAtIndex(index);
+            setIndexStr(''); // limpa input após adicionar
+        } else {
+            alert('Digite um índice válido (número >= 0)');
+        }
+    };
 
-        return () => clearInterval(intervalRef.current); // limpar no unmount
-    }, []);
+    const [dataStr, setDataStr] = useState("No data");
+    const [isModalGenerateVisible, setModalGenerateVisible] = useState(false);
+    const [isModalLoadVisible, setModalLoadVisible] = useState(false);
 
-    //const firstStep = pattern.steps[0];
-    //const numOfLeds = firstStep?.values.length ?? 0;
+    function loadJSON(text: string) {
+        if (text.trim().length === 0) {
+            alert("Textarea is empty!");
+            return;
+        }
 
-    const leds: React.JSX.Element[] = [];
+        try {
+            const json = JSON.parse(text);
 
-    if (currentStep) {
-        console.log("led updated");
-        
-        if(numOfLeds < 20)
-        {
-            for (let i = 0; i < numOfLeds; i++) {
-            const on = currentStep.values[i] === 1;
-                leds.push(<Led key={i} useCustomColor={useCustomColor} step={currentStep} on={on} />);
+            if (!json.steps || !Array.isArray(json.steps)) {
+                alert("JSON inválido: precisa ter um array steps");
+                return;
             }
+
+            let detectedUseCustomColor = false;
+
+            // Mapear os steps do JSON para os seus Steps internos
+            const newSteps: Step[] = json.steps.map((stepValue: any, index: number) => {
+                if (stepValue.useCustomColor === true || stepValue.useCustomLedColor === true) {
+                    detectedUseCustomColor = true;
+                }
+
+                // Garante que time está em 'time' ou 'duration' (ajuste conforme seu JSON)
+                const time = stepValue.time ?? stepValue.duration ?? 300;
+
+                // Garante que valores/leds estão em 'values' ou 'data' (ajuste conforme seu JSON)
+                const values = Array.isArray(stepValue.values)
+                    ? stepValue.values
+                    : Array.isArray(stepValue.data)
+                    ? stepValue.data
+                    : [0, 0, 0];
+
+                // Converte cores caso venha em objeto rgba {r,g,b,a}
+                const convertColor = (c: any) => {
+                    if (typeof c === "string") return c; // já é hex
+                    if (c && typeof c === "object" && "r" in c) return rgbaToHex(c);
+                    return "#0000ff";
+                };
+
+                console.log(stepValue.customColor);
+
+                var step = createStep(time, values);
+                step.useCustomColor = detectedUseCustomColor;
+                step.customColor = stepValue.customColor ? convertColor(stepValue.customColor) : "#0000ff";
+
+                console.log(step.customColor);
+
+                step.useCustomLedColor = detectedUseCustomColor;
+                step.customLedColor = stepValue.customLedColor ? convertColor(stepValue.customLedColor) : "#ffffff";
+
+                return step;
+            });
+
+            setUseCustomColor(detectedUseCustomColor);
+            setPattern({ steps: newSteps });
+
+            setNumOfLeds(newSteps[0]?.values.length ?? 4);
+
+        } catch (err) {
+            alert("Error loading JSON");
+            console.error(err);
         }
     }
 
-    const steps: React.JSX.Element[] = [];
-    for(let i = 0; i < pattern.steps.length; i++)
-    {
-        const step = pattern.steps[i];
-        steps.push(<StepElement key={i} step={step}></StepElement>);
+    const handleLoadData = () => {
+        resetCurrentStepIndex();
+        loadJSON(dataStr);
+        setModalLoadVisible(false);
+    };
+
+    const handleOpenModalGenerate = () => {
+        var data = generateMobileJSON(pattern, useCustomColor);
+
+        setDataStr(data);
+        setModalGenerateVisible(true);
+        
+
     }
 
+  return (
+    <div className='container'>
+      <h3>Preview</h3>
+      <div className='d-flex gap-2 justify-content-center'>
+        {current.values.map((v, i) => <Led key={i} on={v === 1} step={current} useCustomColor={useCustomColor} />)}
+      </div>
 
-    return (
-        <div className="container mt-2">
-            <div className="text-center mb-2">
-                Tempo: {timeElapsedRef.current}ms
-            </div>
-
-            <div className="d-flex justify-content-center gap-1">
-                {leds}
-            </div>
-
-            <div className="d-flex flex-column align-items-center">
-                <div className="d-flex justify-content-start align-items-center m-3">
-                    <span>Número de luzes:</span>
-                    <NumberPicker
-                        startValue={numOfLeds}
-                        min={1}
-                        max={12}
-                        onChange={(value) => setNumOfLeds(value)}
-                    />
-                </div>
-
-                <button className='btn btn-light m-2' onClick={handleToggleCustomColor}>{useCustomColor == false ? "Usar cor customizada" : "Desativar cor customizada" }</button>
-
-                <div>
-                    {steps}
-                </div>
-            </div>
+        <div className="d-flex justify-content-start align-items-center gap-3">
+            <span className=''>Número de luzes:</span>
+            <NumberPicker
+                startValue={numOfLeds}
+                min={1}
+                max={12}
+                onChange={(value) => setNumOfLeds(value)}
+            />
         </div>
-    );
-}
 
-export interface StepElementProps {
-    step: Step
-}
+      <button onClick={toggleColorMode} className='btn btn-secondary my-3'>
+        {useCustomColor ? "Desativar cor customizada" : "Ativar cor customizada"}
+      </button>
 
-const StepElement: React.FC<StepElementProps> = (props) => {
-
-    const {useCustomColor} = useGlobalContext();
-
-    const customColorDisplay = useCustomColor ? "block" : "none";
-
-    const [color, setColor] = useState(props.step.color); // cor inicial
-    const [ledColor, setLedColor] = useState(props.step.ledColor); // cor inicial
-
-    React.useEffect(() => {
-
-        props.step.color = color;
-        props.step.ledColor = ledColor;
-
-    }, [color, ledColor])
-
-    return <>
-        <div className="p-2 border rounded" style={{ maxWidth: 400 }}>
-            {/* Botão de fechar no topo esquerdo */}
-            <div className="d-flex justify-content-start">
-                <button className="btn btn-sm btn-outline-danger">X</button>
-            </div>
-
-            {/* Tempo */}
-            <div className="my-2 d-flex align-items-center">
-                <label className="form-label me-2 mb-0" style={{ minWidth: '60px' }}>Tempo</label>
-                <input type="number" className="form-control" />
-            </div>
-
-            <div>colocar botoes pra acender/apagar</div>
-
-            {/* Cores dos LEDs */}
-            <div className="mt-2" style={{display: customColorDisplay}}>    
-
-                <div className="my-2 d-flex align-items-center">
-                    <label className="form-label">Cor (Corona)</label>
-                    <input
-                        type="color"
-                        className="form-control form-control-color"
-                        value={color}
-                        onChange={(e) => setColor(e.target.value)}
-                    />
-                </div>
-
-                <div className="my-2 d-flex align-items-center">
-                    <label className="form-label">Cor (LED)</label>
-                    <input
-                        type="color"
-                        className="form-control form-control-color"
-                        value={ledColor}
-                        onChange={(e) => setLedColor(e.target.value)}
-                    />
-                </div>
-            </div>
+      <div className="d-flex align-items-center gap-2 my-3">
+            <input
+                type="number"
+                min={0}
+                placeholder="Índice"
+                value={indexStr}
+                onChange={e => setIndexStr(e.target.value)}
+                style={{ width: '80px' }}
+                className="form-control form-control-sm"
+            />
+            <button onClick={handleClick} className="btn btn-secondary btn-sm">
+                Adicionar step
+            </button>
         </div>
-    </>
+
+      {pattern.steps.map((s, i) => <StepElement key={s.id} step={s} index={i} resetCurrentStepIndex={resetCurrentStepIndex} />)}
+
+        <div>
+            <button onClick={() => handleOpenModalGenerate()} className='btn btn-primary m-3'>Gerar json</button>
+            <button onClick={() => setModalLoadVisible(true)} className='btn btn-primary m-3'>Carregar json</button>
+        </div>
+
+        <BasicModal visible={isModalGenerateVisible} onClose={() => {
+            setModalGenerateVisible(false);
+        }}>
+            <div>
+                <textarea 
+                    style={{width: "100%"}}
+                    rows={10}
+                    value={dataStr}
+                    onChange={() => {}}
+                ></textarea>
+            </div>
+        </BasicModal>
+
+        <BasicModal visible={isModalLoadVisible} onClose={() => {
+            setModalLoadVisible(false);
+        }}>
+            <div>
+                <textarea 
+                    style={{width: "100%"}}
+                    rows={10}
+                    value={dataStr}
+                    onChange={(e) => { setDataStr(e.target.value) }}
+                ></textarea>
+
+                <button onClick={handleLoadData}>Carregar</button>
+            </div>
+        </BasicModal>
+    </div>
+  );
+};
+
+const Patterns: React.FC = () => {
+  return (
+    <GlobalProvider>
+      <PatternsPage />
+    </GlobalProvider>
+  );
+};
+
+// Utilitários
+function hexColorToRGBA(hex: string) {
+  hex = hex.replace('#', '');
+  const bigint = parseInt(hex, 16);
+  if (hex.length === 6) {
+    return {
+      r: (bigint >> 16) & 255,
+      g: (bigint >> 8) & 255,
+      b: bigint & 255,
+      a: 255 // alpha inteiro 255 (opaco)
+    };
+  } else if (hex.length === 8) {
+    return {
+      r: (bigint >> 24) & 255,
+      g: (bigint >> 16) & 255,
+      b: (bigint >> 8) & 255,
+      a: bigint & 255 // alpha inteiro 0-255
+    };
+  }
+  return { r: 0, g: 0, b: 0, a: 255 };
 }
 
-interface Step {
-    time: number;
-    values: number[];
-    color: string;
-    ledColor: string;
+function rgbaToHex({ r, g, b, a = 255 }: { r: number; g: number; b: number; a?: number }): string {
+  const toHex = (v: number) => Math.round(v).toString(16).padStart(2, '0');
+  // se alfa for >1, assumir que é 0-255, se <=1, assumir float 0-1
+  const alpha = a > 1 ? a : a * 255;
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}${toHex(alpha)}`;
 }
 
-class Pattern {
-    public steps: Step[] = [];
+function hexToRgba(hex: string, alpha255: boolean = false) {
+  hex = hex.replace('#', '');
 
-    public addStep(time: number, values: number[])
-    {
-        const step: Step = {
-            time: time,
-            values: values,
-            color: "#0000ff",
-            ledColor: "#ffffff"
-        }
+  if (hex.length !== 6 && hex.length !== 8) {
+    return { r: 0, g: 0, b: 0, a: alpha255 ? 255 : 1 };
+  }
+
+  const hasAlpha = hex.length === 8;
+
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const aHex = hasAlpha ? parseInt(hex.substring(6, 8), 16) : (alpha255 ? 255 : 1);
+  const a = alpha255 ? aHex : aHex / 255;
+
+  return { r, g, b, a };
+}
+
+function generateMobileJSON(pattern: Pattern, useCustomColor: boolean)
+{
+    var json: any = {steps: []}
     
-        this.steps.push(step)
-    }
-}
-
-
-export interface LedProps {
-  step: Step
-  on: boolean
-  useCustomColor: boolean
-}
-
-const Led: React.FC<LedProps> = (props) => {
-
-    let colorOn = "red";
-    const colorOff = "#00000000"
-
-    let ledOn = "white";
-    const ledOff = "#000000"
-
-    if(props.useCustomColor)
+    for(const step of pattern.steps)
     {
-        colorOn = props.step.color;
-        ledOn = props.step.ledColor;
+        json.steps.push({
+            data: step.values,
+            duration: step.time,
+            useCustomColor: useCustomColor,
+            customColor: hexColorToRGBA(step.customColor),
+            useCustomLedColor: useCustomColor,
+            customLedColor: hexColorToRGBA(step.customLedColor)
+        });
     }
-
-    const color = props.on ? colorOn : colorOff;
-    const ledColor = props.on ? ledOn : ledOff;
     
-    return <>
-        <div style={{backgroundColor: color}} className='led'>
-            <div style={{backgroundColor: ledColor}} className='led-inside'>
-                
-            </div>
-        </div>
-    </>
-}
-
-const Patterns = () => {
-    return <>
-        <GlobalContextProvider>
-            <PatternsPage></PatternsPage>
-        </GlobalContextProvider>
-    </>
+    var str = ``;
+    str = JSON.stringify(json);
+    
+    return str;
 }
 
 export default Patterns;
