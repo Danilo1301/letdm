@@ -143,7 +143,7 @@ const ChamadaTable: React.FC<ChamadaTableProps> = ({ chamada }) =>
 
     return (
         <>
-            <div className="container">
+            <div className="container text-dark" style={{backgroundColor: "white"}}>
                 <a href="/vilubri/chamadas">Voltar</a>
             
                 <div>Chamada {id}</div>
