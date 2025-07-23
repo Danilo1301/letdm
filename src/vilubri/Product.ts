@@ -27,6 +27,12 @@ export interface TableProductJSON {
     isNewProduct: boolean;
 }
 
+export interface RequestUpdateProduct {
+    productCode: string;
+    chamadaId: string;
+    newPrice: number;
+}
+
 export class Product {
     public productDefinition: ProductDefinition;
     public price: number;

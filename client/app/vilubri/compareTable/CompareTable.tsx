@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Product, ProductWEB, TableProductJSON } from '../../../../src/vilubri/Product';
+import { Product, ProductWEB, RequestUpdateProduct, TableProductJSON } from '../../../../src/vilubri/Product';
 import { ChamadaJSON, ChamadaWEB } from '../../../../src/vilubri/Chamada';
 import { useUser } from '../../components/User';
 import { getLetDM_Key } from '../../../components/cookies';
@@ -186,7 +186,7 @@ const TableProduct: React.FC<TableProductProps> = ({ tableProduct }) => {
 
         if(!chamada) return;
 
-        const products: TableProductJSON[] = [];
+        const productsToUpdate: RequestUpdateProduct[] = [];
 
         for(const tableProduct of globalProducts)
         {
@@ -194,10 +194,14 @@ const TableProduct: React.FC<TableProductProps> = ({ tableProduct }) => {
 
             if(tableProduct.chamada.id != chamada.id) continue;
 
-            products.push(tableProduct);
-        }
+            const productInfo: RequestUpdateProduct = {
+                productCode: tableProduct.product.productDefinition.code,
+                chamadaId: tableProduct.chamada.id,
+                newPrice: tableProduct.newPrice
+            }
 
-        console.log(products);
+            productsToUpdate.push(productInfo);
+        }
 
         //
 
@@ -205,16 +209,22 @@ const TableProduct: React.FC<TableProductProps> = ({ tableProduct }) => {
 
         const data = {
             key: getLetDM_Key(),
-            products: products,
+            products: productsToUpdate,
             chamada: chamada.id
         };
+
+        const json = JSON.stringify(data);
+        const sizeInBytes = new TextEncoder().encode(json).length;
+        
+        console.log(data);
+        console.log(`Tamanho do JSON: ${sizeInBytes} bytes`);
 
         fetch("/api/vilubri/updateChamada", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(data)
+            body: json
         })
         .then(response => {
             if (!response.ok) {

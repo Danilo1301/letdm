@@ -3,7 +3,7 @@ import { PATH_DATA, PATH_UPLOADS } from "../paths";
 import { Chamada, ChamadaJSON, ChamadaType, ChamadaWEB } from "./Chamada";
 import { ChamadaJSON_HomeList } from "./requestTypes";
 import { Theme, ThemeJSON } from "./Theme";
-import { Product, ProductDefinition, TableProductJSON } from "./Product";
+import { Product, ProductDefinition, RequestUpdateProduct, TableProductJSON } from "./Product";
 
 import fs from 'fs'
 import express from 'express';
@@ -701,7 +701,7 @@ export class Vilubri extends App
 
             const id: string = req.body.chamada;
             const key: string = req.body.key;
-            const products: TableProductJSON[] = req.body.products;
+            const products: RequestUpdateProduct[] = req.body.products;
         
             if(!this.authorizeKey(key))
             {
@@ -717,11 +717,11 @@ export class Vilubri extends App
                 return;
             }
 
-            for(const tableProduct of products)
+            for(const productData of products)
             {
-                var product = chamada.getProductByCode(tableProduct.product.productDefinition.code);
+                var product = chamada.getProductByCode(productData.productCode);
 
-                product!.price = tableProduct.newPrice;
+                product!.price = productData.newPrice;
             }
 
             chamada.date = new Date();
