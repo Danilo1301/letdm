@@ -130,7 +130,11 @@ export class Chamada {
                     hasIPI = result[1];
                 }
 
-                const productDefinition = VilubriData.getProductDefinitionByCode(productJson.productCode);
+                let productDefinition = VilubriData.getProductDefinitionByCode(productJson.productCode);
+                if(productDefinition == undefined)
+                {
+                    productDefinition = VilubriData.tryCreateProductDefinition(productJson.productCode, "Desconhecido", "", false);
+                }
 
                 const product = new Product(productDefinition, price);
 

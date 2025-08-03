@@ -433,7 +433,7 @@ const PatternsPage: React.FC = () => {
             <NumberPicker
                 startValue={numOfLeds}
                 min={1}
-                max={12}
+                max={50}
                 onChange={(value) => setNumOfLeds(value)}
             />
         </div>

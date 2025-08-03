@@ -11,12 +11,6 @@ export class VilubriData
     public static getProductDefinitionByCode(code: string)
     {
         const def = this.Products.get(code);
-
-        if(def == undefined)
-        {
-            throw "Produto não encontrado";
-        }
-
         return def;
     }
 
