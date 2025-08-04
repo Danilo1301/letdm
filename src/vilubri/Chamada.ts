@@ -130,6 +130,13 @@ export class Chamada {
                     hasIPI = result[1];
                 }
 
+                if(typeof productJson.productCode != "string")
+                {
+                    console.error("wtf is wrong with you");
+                    productJson.productCode = `${productJson.productCode}`;
+                }
+
+
                 let productDefinition = VilubriData.getProductDefinitionByCode(productJson.productCode);
                 if(productDefinition == undefined)
                 {

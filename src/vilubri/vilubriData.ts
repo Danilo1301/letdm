@@ -25,6 +25,11 @@ export class VilubriData
 
     public static tryCreateProductDefinition(code: string, name: string, description: string, hasIPI: boolean)
     {
+        if(typeof code != "string")
+        {
+            throw `Code '${code}' must be a string (is ${typeof code})`;
+        }
+
         if(this.Products.has(code))
         {
             const currentDef = this.Products.get(code)!;

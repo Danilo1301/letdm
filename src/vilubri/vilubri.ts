@@ -681,14 +681,21 @@ export class Vilubri extends App
         
             for(const chamada of VilubriData.Chamadas.values())
             {
-                console.log(`Looping products for chamada ${chamada.id}...`);
+                //console.log(`Looping products for chamada ${chamada.id}...`);
                 for(const product of chamada.getProductsList())
                 {
-                    if(product.productDefinition.name.toLowerCase().includes(name.toLowerCase()) || product.productDefinition.code.includes(name))
+                    try
                     {
-                        console.log(`Found product ${product.productDefinition.name}`)
-                        json.push(chamada.toWEB());
-                        break;
+                        if(product.productDefinition.name.toLowerCase().includes(name.toLowerCase()) || product.productDefinition.code.includes(name))
+                        {
+                            console.log(`Found product ${product.productDefinition.name}`)
+                            json.push(chamada.toWEB());
+                            break;
+                        }
+                    } catch(e)
+                    {
+                        console.error(`Error in ${JSON.stringify(product.productDefinition)}`);
+                        throw e;
                     }
                 }
             }
@@ -908,16 +915,16 @@ export class Vilubri extends App
             {
                 const def = data[id];
 
-                if(typeof def.code == "number")
+                if(typeof def.code != "string")
                 {
                     def.code = `${def.code}`;
 
-                    console.error(`Code was a number? in ${id}`);
+                    console.error(`Code was not a string! in ${id}`);
 
                     needToSave = true;
                 }
 
-                VilubriData.Products.set(id, def);
+                VilubriData.Products.set(def.code, def);
             }
 
             if(needToSave)
@@ -925,8 +932,6 @@ export class Vilubri extends App
                 this.saveProductDefinitions();
             }
         }
-
-        
 
         console.log(`${VilubriData.Products.size} products definitions`);
     }
@@ -979,10 +984,6 @@ export class Vilubri extends App
   
                     for(const productJson of table)
                     {
-                        //console.log(product.code);
-                        //console.log(productJson);
-
-                        //console.log(product);
                         const product = VilubriData.tryCreateProduct(productJson.code, productJson.name, productJson.description, productJson.hasIPI, productJson.price);
 
                         chamada.addProductToTable(tableIndex, product);
