@@ -681,7 +681,7 @@ export class Vilubri extends App
         
             for(const chamada of VilubriData.Chamadas.values())
             {
-                console.log(`Loopíng products for chamada ${chamada.id}...`);
+                console.log(`Looping products for chamada ${chamada.id}...`);
                 for(const product of chamada.getProductsList())
                 {
                     if(product.productDefinition.name.toLowerCase().includes(name.toLowerCase()) || product.productDefinition.code.includes(name))
@@ -898,6 +898,8 @@ export class Vilubri extends App
 
         if(fs.existsSync(PATH_PRODUCT_DEFINITIONS))
         {
+            let needToSave = false;
+
             VilubriData.Products.clear();
 
             const data: {[key: string]: ProductDefinition} = JSON.parse(fs.readFileSync(PATH_PRODUCT_DEFINITIONS, "utf-8"));
@@ -906,9 +908,25 @@ export class Vilubri extends App
             {
                 const def = data[id];
 
+                if(typeof def.code == "number")
+                {
+                    def.code = `${def.code}`;
+
+                    console.error(`Code was a number? in ${id}`);
+
+                    needToSave = true;
+                }
+
                 VilubriData.Products.set(id, def);
             }
+
+            if(needToSave)
+            {
+                this.saveProductDefinitions();
+            }
         }
+
+        
 
         console.log(`${VilubriData.Products.size} products definitions`);
     }
