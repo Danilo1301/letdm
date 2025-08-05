@@ -662,6 +662,7 @@ export class Vilubri extends App
 
                 res.json(changedProducts);
             } catch (error) {
+                console.error(error);
 
                 res.status(500).send({ error: "Error processing the table" });
             }
@@ -763,8 +764,8 @@ export class Vilubri extends App
         {
             if(a.length == 0) continue;
 
-            const name = a[nameTableId];
-            const code = a[codeTableId];
+            const name = `${a[nameTableId]}`;
+            const code = `${a[codeTableId]}`;
             const price = parseFloat(parseFloat(a[priceTableId]).toFixed(2));
 
             // ignore first row
