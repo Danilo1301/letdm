@@ -532,7 +532,7 @@ export class Vilubri extends App
 
             //product.code = code;
             product.productDefinition.name = name;
-            product.productDefinition.description = name;
+            product.productDefinition.description = description;
             product.productDefinition.hasIPI = priceFormat[1];
             product.price = priceFormat[0];
 
